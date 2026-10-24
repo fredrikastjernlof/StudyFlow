@@ -63,7 +63,258 @@
 
     <section aria-labelledby="tasks-heading">
         <h2 id="tasks-heading">Uppgifter</h2>
-        <p>Här kommer kursens uppgifter att visas.</p>
+
+        @if (Model.Tasks.Any())
+        {
+            <ul>
+                @foreach (var task in Model.Tasks)
+                {
+                    <li>
+                        <h3>
+                            <button type="button" class="task-details-button" data-task-id="@task.Id">
+                                @task.Title
+                            </button>
+                        </h3>
+
+                        <p class="task-course-name">@Model.Course.Name</p>
+
+                        <p>Prioritet:
+                            @(task.Priority == 3 ? "Hög" :
+                              task.Priority == 2 ? "Medel" : "Låg")
+                        </p>
+
+                        @if (task.Deadline.HasValue)
+                        {
+                            <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
+                        }
+
+                        @if (task.ChecklistItems.Any())
+                        {
+                            var completed = task.ChecklistItems.Count(item => item.IsCompleted);
+                            var total = task.ChecklistItems.Count;
+
+                            <div class="task-card-checklist">
+                                <ul>
+                                    @foreach (var item in task.ChecklistItems.OrderBy(item => item.IsCompleted).ThenBy(item =>
+                        item.Id))
+                                    {
+                                        <li data-order="@item.Id">
+                                            <label>
+                                                <input type="checkbox" class="checklist-checkbox" data-item-id="@item.Id"
+                                                       checked="@item.IsCompleted" />
+                                                @item.Title
+                                            </label>
+                                        </li>
+                                    }
+                                </ul>
+
+                                <p class="checklist-count">@completed/@total done</p>
+                                <progress class="checklist-progress" value="@completed" max="@total">
+                                </progress>
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Inga uppgifter har lagts till i den här kursen ännu.</p>
+        }
+    </section>
+
+    @foreach (var task in Model.Tasks)
+    {
+        var completedItems = task.ChecklistItems.Count(i => i.IsCompleted);
+        var totalItems = task.ChecklistItems.Count;
+
+        <dialog id="taskDialog-@task.Id" aria-labelledby="taskHeading-@task.Id">
+            <h2 id="taskHeading-@task.Id">@task.Title</h2>
+            <p>@task.Description</p>
+
+            <p>Prioritet:
+                @(task.Priority == 3 ? "Hög" :
+                  task.Priority == 2 ? "Medel" : "Låg")
+            </p>
+
+            <form method="post" asp-page-handler="UpdateTaskStatus" class="task-status-form">
+                <input type="hidden" name="taskId" value="@task.Id" />
+
+                <div>
+                    <label for="taskStatus-@task.Id">Status</label>
+
+                    <select id="taskStatus-@task.Id" name="status" class="task-status-select">
+                        <option value="NotStarted" selected="@(task.Status == "NotStarted")">
+                            Ej påbörjad
+                        </option>
+                        <option value="InProgress" selected="@(task.Status == "InProgress")">
+                            Pågående
+                        </option>
+                        <option value="Completed" selected="@(task.Status == "Completed")">
+                            Avklarad
+                        </option>
+                    </select>
+                </div>
+            </form>
+
+            @if (task.Deadline.HasValue)
+            {
+                <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
+            }
+
+            <hr />
+
+            <section aria-labelledby="checklistHeading-@task.Id">
+                <h3 id="checklistHeading-@task.Id">Checklista</h3>
+
+                @if (totalItems > 0)
+                {
+                    <ul>
+                        @foreach (var item in task.ChecklistItems.OrderBy(i => i.IsCompleted).ThenBy(i => i.Id))
+                        {
+                            <li data-order="@item.Id">
+                                <label>
+                                    <input type="checkbox" class="checklist-checkbox" data-item-id="@item.Id"
+                                           checked="@item.IsCompleted" />
+                                    @item.Title
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>Inga delmoment har lagts till ännu.</p>
+                }
+            </section>
+
+            <section aria-label="Checklistans framsteg">
+                <div>
+                    <strong>Making progress!</strong>
+                    <span class="checklist-count">@completedItems/@totalItems done</span>
+                </div>
+
+                <progress class="checklist-progress" value="@completedItems" max="@(totalItems > 0 ? totalItems : 1)"
+                          aria-label="Avklarade delmoment">
+                </progress>
+            </section>
+
+            <button type="button" class="open-edit-task-dialog" data-task-id="@task.Id">
+                Redigera
+            </button>
+            <button type="button" class="close-task-dialog">
+                Stäng
+            </button>
+        </dialog>
+    }
+
+    @foreach (var task in Model.Tasks)
+    {
+        <dialog id="editTaskDialog-@task.Id" aria-labelledby="editTaskHeading-@task.Id">
+            <h2 id="editTaskHeading-@task.Id">Redigera uppgift</h2>
+
+            <form method="post" asp-page-handler="EditTask" class="edit-task-form">
+                <input type="hidden" name="taskId" value="@task.Id" />
+
+                <div>
+                    <label for="editTitle-@task.Id">Uppgiftens namn</label>
+                    <input id="editTitle-@task.Id" name="title" value="@task.Title" maxlength="100" required />
+                </div>
+
+                <div>
+                    <label for="editDescription-@task.Id">Beskrivning</label>
+                    <textarea id="editDescription-@task.Id" name="description" rows="4">@task.Description</textarea>
+                </div>
+
+                <div>
+                    <label for="editDeadline-@task.Id">Deadline</label>
+                    <input id="editDeadline-@task.Id" name="deadline" type="date"
+                           value="@(task.Deadline?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div>
+                    <label for="editPriority-@task.Id">Prioritet</label>
+                    <select id="editPriority-@task.Id" name="priority">
+                        <option value="1" selected="@(task.Priority == 1)">Låg</option>
+                        <option value="2" selected="@(task.Priority == 2)">Medel</option>
+                        <option value="3" selected="@(task.Priority == 3)">Hög</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="editHours-@task.Id">Uppskattad arbetsinsats (timmar)</label>
+                    <input id="editHours-@task.Id" name="estimatedHours" type="number" min="0" max="1000" step="0.5"
+                           value="@task.EstimatedHours" />
+                </div>
+
+                <section>
+                    <h3>Redigera checklista</h3>
+
+                    <div class="edit-checklist-items">
+                        @foreach (var item in task.ChecklistItems.OrderBy(i => i.Id))
+                        {
+                            <button type="button" class="remove-checklist-row">
+                                Ta bort
+                            </button>
+                            <div class="edit-checklist-row">
+                                <input type="hidden" name="itemIds" value="@item.Id" />
+                                <input type="text" name="itemTitles" value="@item.Title" maxlength="100" aria-label="Delmoment"
+                                       required />
+                            </div>
+                        }
+                    </div>
+
+                    <button type="button" class="add-checklist-row">
+                        Lägg till delmoment
+                    </button>
+                </section>
+
+                <button type="submit">Spara ändringar</button>
+                <button type="button" class="close-edit-task-dialog">Avbryt</button>
+            </form>
+        </dialog>
+    }
+
+    <section aria-labelledby="add-task-heading">
+        <h2 id="add-task-heading">Lägg till uppgift</h2>
+
+        <form method="post" asp-page-handler="CreateTask">
+            <div>
+                <label asp-for="TaskInput.Title">Uppgiftens namn</label>
+                <input asp-for="TaskInput.Title" placeholder="Ange uppgiftens namn" />
+                <span asp-validation-for="TaskInput.Title" class="text-danger"></span>
+            </div>
+
+            <div>
+                <label asp-for="TaskInput.Description">Beskrivning</label>
+                <textarea asp-for="TaskInput.Description" rows="4"></textarea>
+                <span asp-validation-for="TaskInput.Description" class="text-danger"></span>
+            </div>
+            <div>
+                <label asp-for="TaskInput.Deadline">Deadline</label>
+                <input asp-for="TaskInput.Deadline" type="date" />
+                <span asp-validation-for="TaskInput.Deadline"></span>
+            </div>
+
+            <div>
+                <label asp-for="TaskInput.Priority">Prioritet</label>
+                <select asp-for="TaskInput.Priority">
+                    <option value="1">Låg</option>
+                    <option value="2">Medel</option>
+                    <option value="3">Hög</option>
+                </select>
+                <span asp-validation-for="TaskInput.Priority"></span>
+            </div>
+
+            <div>
+                <label asp-for="TaskInput.EstimatedHours">
+                    Uppskattad arbetsinsats (timmar)
+                </label>
+                <input asp-for="TaskInput.EstimatedHours" type="number" min="0" max="1000" step="0.5" />
+                <span asp-validation-for="TaskInput.EstimatedHours"></span>
+            </div>
+            <button type="submit">Skapa uppgift</button>
+        </form>
     </section>
 </main>
 
@@ -88,6 +339,196 @@
     document.getElementById("closeDeleteCourseDialog").addEventListener("click", () => {
         deleteCourseDialog.close();
         editCourseDialog.showModal();
+    });
+
+    // Open the selected task's details dialog.
+    document.querySelectorAll(".task-details-button").forEach(button => {
+        button.addEventListener("click", () => {
+            const taskId = button.dataset.taskId;
+            const dialog = document.getElementById(`taskDialog-${taskId}`);
+
+            dialog.showModal();
+        });
+    });
+
+    // Close the task details dialog.
+    document.querySelectorAll(".close-task-dialog").forEach(button => {
+        button.addEventListener("click", () => {
+            button.closest("dialog").close();
+        });
+    });
+
+    // Automatically save the task status when changed, without reloading the page.
+    document.querySelectorAll(".task-status-select").forEach(select => {
+        let savedStatus = select.value;
+
+        select.addEventListener("change", async () => {
+            const form = select.closest("form");
+            const formData = new FormData(form);
+
+            select.disabled = true;
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to save status.");
+                }
+
+                savedStatus = select.value;
+            } catch (error) {
+                console.error(error);
+                select.value = savedStatus;
+                alert("Kunde inte spara statusen.");
+            } finally {
+                select.disabled = false;
+            }
+        });
+    });
+
+    // Save checklist changes and synchronize progress across the page.
+    document.querySelectorAll(".checklist-checkbox").forEach(checkbox => {
+        checkbox.addEventListener("change", async () => {
+            const itemId = checkbox.dataset.itemId;
+            const isCompleted = checkbox.checked;
+
+            const matchingCheckboxes = document.querySelectorAll(
+                `.checklist-checkbox[data-item-id="${itemId}"]`
+            );
+
+            matchingCheckboxes.forEach(item => {
+                item.disabled = true;
+            });
+
+            try {
+                const token = document.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                ).value;
+
+                const data = new FormData();
+                data.append("itemId", itemId);
+                data.append("isCompleted", isCompleted);
+                data.append("__RequestVerificationToken", token);
+
+                const response = await fetch(
+                    `${window.location.pathname}?handler=UpdateChecklistItem`,
+                    {
+                        method: "POST",
+                        body: data
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to update checklist item.");
+                }
+
+                // Synchronize matching checkboxes.
+                matchingCheckboxes.forEach(item => {
+                    item.checked = isCompleted;
+                });
+
+                // Keep incomplete items in their original order and completed items last.
+                matchingCheckboxes.forEach(item => {
+                    const list = item.closest("ul");
+
+                    const sortedItems = [...list.children].sort((a, b) => {
+                        const aCompleted = a.querySelector(".checklist-checkbox").checked;
+                        const bCompleted = b.querySelector(".checklist-checkbox").checked;
+
+                        if (aCompleted !== bCompleted) {
+                            return Number(aCompleted) - Number(bCompleted);
+                        }
+
+                        return Number(a.dataset.order) - Number(b.dataset.order);
+                    });
+
+                    sortedItems.forEach(row => list.appendChild(row));
+                });
+
+                // Update progress in both task cards and dialogs.
+                document.querySelectorAll(".task-card-checklist, dialog[id^='taskDialog-']")
+                    .forEach(container => {
+                        const checkboxes = container.querySelectorAll(".checklist-checkbox");
+
+                        if (checkboxes.length === 0) return;
+
+                        const completed = [...checkboxes].filter(item => item.checked).length;
+                        const total = checkboxes.length;
+
+                        const count = container.querySelector(".checklist-count");
+                        const progress = container.querySelector(".checklist-progress");
+
+                        if (count) count.textContent = `${completed}/${total} done`;
+                        if (progress) progress.value = completed;
+                    });
+
+            } catch (error) {
+                console.error(error);
+
+                matchingCheckboxes.forEach(item => {
+                    item.checked = !isCompleted;
+                });
+
+                alert("Kunde inte spara delmomentet.");
+            } finally {
+                matchingCheckboxes.forEach(item => {
+                    item.disabled = false;
+                });
+            }
+        });
+    });
+
+    // Open the task editor from the details dialog.
+    document.querySelectorAll(".open-edit-task-dialog").forEach(button => {
+        button.addEventListener("click", () => {
+            const taskId = button.dataset.taskId;
+
+            document.getElementById(`taskDialog-${taskId}`).close();
+            document.getElementById(`editTaskDialog-${taskId}`).showModal();
+        });
+    });
+
+    // Add new checklist items without submitting the form.
+    document.querySelectorAll(".add-checklist-row").forEach(button => {
+        button.addEventListener("click", () => {
+            const container = button
+                .closest(".edit-task-form")
+                .querySelector(".edit-checklist-items");
+
+            const row = document.createElement("div");
+            row.className = "edit-checklist-row";
+
+            row.innerHTML = `
+            <input type="text" name="newItemTitles"
+                   maxlength="100" aria-label="Nytt delmoment" required />
+            <button type="button" class="remove-checklist-row">
+                Ta bort
+            </button>
+        `;
+
+            container.appendChild(row);
+        });
+    });
+
+    // Remove checklist rows without submitting the form.
+    document.querySelectorAll(".edit-task-form").forEach(form => {
+        form.addEventListener("click", event => {
+            const removeButton = event.target.closest(".remove-checklist-row");
+
+            if (removeButton) {
+                removeButton.closest(".edit-checklist-row").remove();
+            }
+        });
+    });
+
+    // Close the task editor.
+    document.querySelectorAll(".close-edit-task-dialog").forEach(button => {
+        button.addEventListener("click", () => {
+            button.closest("dialog").close();
+        });
     });
 
     @if (!ViewData.ModelState.IsValid)
