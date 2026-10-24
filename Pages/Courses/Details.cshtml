@@ -12,8 +12,88 @@
         <h1>@Model.Course.Name</h1>
     </header>
 
+    <button type="button" id="openEditCourseDialog">
+        Redigera kurs
+    </button>
+
+    <dialog id="editCourseDialog" aria-labelledby="editCourseDialogTitle">
+        <h2 id="editCourseDialogTitle">Redigera kurs</h2>
+
+        <form method="post" asp-page-handler="Edit">
+            <div>
+                <label asp-for="CourseName">Kursnamn</label>
+                <input asp-for="CourseName" />
+                <span asp-validation-for="CourseName" class="text-danger"></span>
+            </div>
+
+            <div>
+                <label asp-for="CourseColor">Kursfärg</label>
+                <input asp-for="CourseColor" type="color" />
+                <span asp-validation-for="CourseColor" class="text-danger"></span>
+            </div>
+
+            <button type="submit">Spara ändringar</button>
+            <button type="button" id="closeEditCourseDialog">Avbryt</button>
+            <button type="button" id="openDeleteCourseDialog">Ta bort kurs</button>
+        </form>
+    </dialog>
+
+    <dialog id="deleteCourseDialog" aria-labelledby="deleteCourseDialogTitle"
+            aria-describedby="deleteCourseDialogDescription">
+
+        <h2 id="deleteCourseDialogTitle">Ta bort kurs?</h2>
+
+        <p id="deleteCourseDialogDescription">
+            Är du säker på att du vill ta bort kursen
+            <strong>@Model.Course.Name</strong>?
+            Alla uppgifter och checklistor som tillhör kursen
+            kommer också att raderas permanent.
+        </p>
+
+        <form method="post" asp-page-handler="Delete">
+            <button type="button" id="closeDeleteCourseDialog">
+                Avbryt
+            </button>
+
+            <button type="submit">
+                Ja, ta bort kurs
+            </button>
+        </form>
+    </dialog>
+
     <section aria-labelledby="tasks-heading">
         <h2 id="tasks-heading">Uppgifter</h2>
         <p>Här kommer kursens uppgifter att visas.</p>
     </section>
 </main>
+
+<script>
+    const editCourseDialog = document.getElementById("editCourseDialog");
+
+    document.getElementById("openEditCourseDialog").addEventListener("click", () => {
+        editCourseDialog.showModal();
+    });
+
+    document.getElementById("closeEditCourseDialog").addEventListener("click", () => {
+        editCourseDialog.close();
+    });
+
+    const deleteCourseDialog = document.getElementById("deleteCourseDialog");
+
+    document.getElementById("openDeleteCourseDialog").addEventListener("click", () => {
+        editCourseDialog.close();
+        deleteCourseDialog.showModal();
+    });
+
+    document.getElementById("closeDeleteCourseDialog").addEventListener("click", () => {
+        deleteCourseDialog.close();
+        editCourseDialog.showModal();
+    });
+
+    @if (!ViewData.ModelState.IsValid)
+        {
+            <text>
+                    editCourseDialog.showModal();
+            </text>
+    }
+</script>
