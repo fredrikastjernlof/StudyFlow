@@ -7,20 +7,57 @@
 
 <h1>Mina kurser</h1>
 
-<form method="post">
-    <div>
-        <label asp-for="CourseName">Kursnamn</label>
-        <input asp-for="CourseName" placeholder="Ange kursnamn" />
-        <span asp-validation-for="CourseName" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="CourseColor">Kursfärg</label>
-        <input asp-for="CourseColor" type="color" />
-        <span asp-validation-for="CourseColor" class="text-danger"></span>
-    </div>
+<button type="button" id="openCourseDialog">
+    + Lägg till kurs
+</button>
 
-    <button type="submit">Lägg till kurs</button>
-</form>
+<dialog id="courseDialog" aria-labelledby="courseDialogTitle">
+    <h2 id="courseDialogTitle">Lägg till kurs</h2>
+
+    <form method="post">
+        <div>
+            <label asp-for="CourseName">Kursnamn</label>
+            <input asp-for="CourseName" placeholder="Ange kursnamn" />
+            <span asp-validation-for="CourseName" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="CourseColor">Kursfärg</label>
+            <input asp-for="CourseColor" type="color" />
+            <span asp-validation-for="CourseColor" class="text-danger"></span>
+        </div>
+
+        <button type="submit">Lägg till kurs</button>
+    </form>
+
+    <button type="button" id="closeCourseDialog">
+        Avbryt
+    </button>
+</dialog>
+
+<script>
+    const courseDialog = document.getElementById("courseDialog");
+
+    document.getElementById("openCourseDialog").addEventListener("click", () => {
+        courseDialog.showModal();
+    });
+
+    document.getElementById("closeCourseDialog").addEventListener("click", () => {
+        courseDialog.close();
+    });
+
+    courseDialog.addEventListener("click", (event) => {
+        if (event.target === courseDialog) {
+            courseDialog.close();
+        }
+    });
+
+    @if (!ViewData.ModelState.IsValid)
+        {
+            <text>
+                    courseDialog.showModal();
+            </text>
+    }
+</script>
 
 @if (Model.Courses.Count == 0)
 {
@@ -28,13 +65,13 @@
 }
 else
 {
-    <ul>
+    <ul class="course-grid">
         @foreach (var course in Model.Courses)
         {
-            <li>
-                <span style="background-color: @course.Color; padding: 8px 16px; border-radius: 8px;">
-                    @course.Name
-                </span>
+            <li class="course-grid-item">
+                <a asp-page="./Details" asp-route-id="@course.Id" class="course-card" style="background-color: @course.Color;">
+                    <span>@course.Name</span>
+                </a>
             </li>
         }
     </ul>

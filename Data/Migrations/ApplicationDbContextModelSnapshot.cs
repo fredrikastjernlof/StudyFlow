@@ -366,7 +366,8 @@ namespace StudyFlow.Data.Migrations
                 {
                     b.HasOne("StudyFlow.Models.Course", "Course")
                         .WithMany("Tasks")
-                        .HasForeignKey("CourseId");
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Course");
                 });

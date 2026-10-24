@@ -1,0 +1,19 @@
+@page "{id:int}"
+@model StudyFlow.Pages.Courses.DetailsModel
+
+@{
+    ViewData["Title"] = Model.Course.Name;
+}
+
+<main>
+    <a asp-page="./Index">← Tillbaka till mina kurser</a>
+
+    <header>
+        <h1>@Model.Course.Name</h1>
+    </header>
+
+    <section aria-labelledby="tasks-heading">
+        <h2 id="tasks-heading">Uppgifter</h2>
+        <p>Här kommer kursens uppgifter att visas.</p>
+    </section>
+</main>
