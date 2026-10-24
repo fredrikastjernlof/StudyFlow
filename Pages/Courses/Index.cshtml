@@ -1,0 +1,41 @@
+@page
+@model StudyFlow.Pages.Courses.IndexModel
+
+@{
+    ViewData["Title"] = "Mina kurser";
+}
+
+<h1>Mina kurser</h1>
+
+<form method="post">
+    <div>
+        <label asp-for="CourseName">Kursnamn</label>
+        <input asp-for="CourseName" placeholder="Ange kursnamn" />
+        <span asp-validation-for="CourseName" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="CourseColor">Kursfärg</label>
+        <input asp-for="CourseColor" type="color" />
+        <span asp-validation-for="CourseColor" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Lägg till kurs</button>
+</form>
+
+@if (Model.Courses.Count == 0)
+{
+    <p>Du har inte lagt till några kurser ännu.</p>
+}
+else
+{
+    <ul>
+        @foreach (var course in Model.Courses)
+        {
+            <li>
+                <span style="background-color: @course.Color; padding: 8px 16px; border-radius: 8px;">
+                    @course.Name
+                </span>
+            </li>
+        }
+    </ul>
+}
