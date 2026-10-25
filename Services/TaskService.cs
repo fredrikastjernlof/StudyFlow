@@ -15,6 +15,19 @@ public class TaskService
         _context = context;
     }
 
+    // Get all tasks belonging to the user, including standalone tasks.
+    public async Task<List<StudyTask>> GetUserTasksAsync(string userId)
+    {
+        return await _context.StudyTasks
+            .AsNoTracking()
+            .Include(t => t.Course)
+            .Include(t => t.ChecklistItems)
+            .Where(t => t.UserId == userId)
+            .OrderBy(t => t.Deadline == null)
+            .ThenBy(t => t.Deadline)
+            .ToListAsync();
+    }
+
     // Get tasks belonging to a specific course and user.
     public async Task<List<StudyTask>> GetCourseTasksAsync(int courseId, string userId)
     {
@@ -27,20 +40,23 @@ public class TaskService
 
     // Create a task with its checklist items.
     public async Task CreateTaskAsync(
-        int courseId,
+        int? courseId,
         string userId,
         StudyTaskInputModel input,
         List<string> checklistItems)
     {
 
-        // Verify that the course belongs to the user.
-        var courseExists = await _context.Courses
-            .AnyAsync(c => c.Id == courseId && c.UserId == userId);
-
-        if (!courseExists)
+        // Verify course ownership only when a course is selected.
+        if (courseId.HasValue)
         {
-            throw new UnauthorizedAccessException(
-                "The course does not exist or does not belong to the user.");
+            var courseExists = await _context.Courses
+                .AnyAsync(c => c.Id == courseId.Value && c.UserId == userId);
+
+            if (!courseExists)
+            {
+                throw new UnauthorizedAccessException(
+                    "The course does not exist or does not belong to the user.");
+            }
         }
 
         var task = new StudyTask
@@ -72,25 +88,29 @@ public class TaskService
         await _context.SaveChangesAsync();
     }
 
-    // Update the status of a task belonging to the user and course.
+    // Update the status of a task belonging to the user.
     public async Task<bool> UpdateTaskStatusAsync(
         int taskId,
-        int courseId,
+        int? courseId,
         string userId,
         string status)
     {
-        var task = await _context.StudyTasks.FirstOrDefaultAsync(t =>
-            t.Id == taskId &&
-            t.CourseId == courseId &&
-            t.UserId == userId);
-
-        if (task == null)
-            return false;
-
         if (status != "NotStarted" &&
             status != "InProgress" &&
             status != "Completed")
+        {
             return false;
+        }
+
+        var task = await _context.StudyTasks.FirstOrDefaultAsync(t =>
+            t.Id == taskId &&
+            t.UserId == userId &&
+            t.CourseId == courseId);
+
+        if (task == null)
+        {
+            return false;
+        }
 
         task.Status = status;
         await _context.SaveChangesAsync();
@@ -98,19 +118,21 @@ public class TaskService
         return true;
     }
 
-    // Delete a task belonging to the specified user and course.
+    // Delete a task belonging to the user.
     public async Task<bool> DeleteTaskAsync(
         int taskId,
-        int courseId,
+        int? courseId,
         string userId)
     {
         var task = await _context.StudyTasks.FirstOrDefaultAsync(t =>
             t.Id == taskId &&
-            t.CourseId == courseId &&
-            t.UserId == userId);
+            t.UserId == userId &&
+            t.CourseId == courseId);
 
         if (task == null)
+        {
             return false;
+        }
 
         _context.StudyTasks.Remove(task);
         await _context.SaveChangesAsync();
@@ -118,24 +140,25 @@ public class TaskService
         return true;
     }
 
-    // Get a task with its checklist items for the specified user and course.
+    // Get a task and its checklist items for the specified user.
     public async Task<StudyTask?> GetTaskByIdAsync(
         int taskId,
-        int courseId,
+        int? courseId,
         string userId)
     {
         return await _context.StudyTasks
+            .Include(t => t.Course)
             .Include(t => t.ChecklistItems)
             .FirstOrDefaultAsync(t =>
                 t.Id == taskId &&
-                t.CourseId == courseId &&
-                t.UserId == userId);
+                t.UserId == userId &&
+                t.CourseId == courseId);
     }
 
     // Update task details and synchronize checklist items.
     public async Task<bool> UpdateTaskAsync(
         int taskId,
-        int courseId,
+        int? courseId,
         string userId,
         string title,
         string? description,
@@ -193,7 +216,7 @@ public class TaskService
         }
 
         await _context.SaveChangesAsync();
-        
+
         return true;
     }
 }

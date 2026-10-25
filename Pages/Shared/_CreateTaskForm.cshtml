@@ -1,0 +1,140 @@
+
+@model StudyFlow.ViewModels.StudyTaskInputModel
+
+@{
+    var showCourseSelect = ViewData["ShowCourseSelect"] is true;
+    var courses = ViewData["AvailableCourses"] as IEnumerable<StudyFlow.Models.Course>;
+    var selectedCourseId = ViewData["SelectedCourseId"]?.ToString();
+}
+
+<form method="post" asp-page-handler="CreateTask" class="create-task-form" novalidate>
+
+    @if (!ViewData.ModelState.IsValid &&
+        ViewData.ModelState.Keys.Any(k =>
+            k.StartsWith("TaskInput.") || k == "checklistItems" || k == "CourseId"))
+    {
+        <div class="validation-summary text-danger" role="alert">
+            <strong>Kontrollera följande:</strong>
+            <ul>
+                @foreach (var error in ViewData.ModelState
+                    .Where(kvp => kvp.Key.StartsWith("TaskInput.") ||
+                                  kvp.Key == "checklistItems" ||
+                                  kvp.Key == "CourseId")
+                    .SelectMany(kvp => kvp.Value!.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .Distinct())
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <div class="validation-summary text-danger"
+             role="alert" aria-live="polite" hidden></div>
+    }
+
+    @if (showCourseSelect)
+    {
+        <div>
+            <label for="CourseId">Kurs (frivilligt)</label>
+            <select id="CourseId" name="CourseId">
+                <option value="">Ingen kurs</option>
+                @if (courses != null)
+                {
+                    @foreach (var course in courses)
+                    {
+                        if (selectedCourseId == course.Id.ToString())
+                        {
+                            <option value="@course.Id" selected>@course.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@course.Id">@course.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    }
+
+    <div>
+        <label for="TaskInput_Title">Uppgiftens namn</label>
+        <input id="TaskInput_Title" name="TaskInput.Title"
+               value="@Model.Title" maxlength="100"
+               placeholder="Ange uppgiftens namn" />
+    </div>
+
+    <div>
+        <label for="TaskInput_Description">Beskrivning</label>
+        <textarea id="TaskInput_Description" name="TaskInput.Description"
+                  rows="4" maxlength="1000">@Model.Description</textarea>
+    </div>
+
+    <div>
+        <label for="TaskInput_Priority">Prioritet</label>
+        <select id="TaskInput_Priority" name="TaskInput.Priority">
+            @foreach (var option in new[] { (1, "Låg"), (2, "Medel"), (3, "Hög") })
+            {
+                if (Model.Priority == option.Item1)
+                {
+                    <option value="@option.Item1" selected>@option.Item2</option>
+                }
+                else
+                {
+                    <option value="@option.Item1">@option.Item2</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div>
+        <label for="TaskInput_EstimatedHours">Uppskattad arbetsinsats (timmar)</label>
+        <input id="TaskInput_EstimatedHours" name="TaskInput.EstimatedHours"
+               type="number" min="0" max="1000" step="0.5"
+               value="@Model.EstimatedHours.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+    </div>
+
+    <div>
+        <label for="TaskInput_Deadline">Deadline</label>
+        <input id="TaskInput_Deadline" name="TaskInput.Deadline"
+               type="date" value="@Model.Deadline?.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <section class="create-task-checklist">
+        <h3>Checklista</h3>
+
+        <label for="newChecklistItem">Lägg till delmoment (frivilligt)</label>
+
+        <div class="new-checklist-items">
+            <div class="new-checklist-row">
+                <input type="text" id="newChecklistItem"
+                       name="checklistItems" placeholder="Delmoment 1"
+                       maxlength="100" />
+            </div>
+
+            @if (ViewData["PostedChecklistItems"] is List<string> postedItems)
+            {
+                @foreach (var postedItem in postedItems)
+                {
+                    <div class="new-checklist-row">
+                        <input type="text" name="checklistItems"
+                               value="@postedItem" maxlength="100" />
+                        <button type="button" class="remove-new-checklist-item">
+                            Ta bort
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+
+        <p data-error-for="checklistItems" class="text-danger" role="alert"></p>
+
+        <button type="button" class="add-new-checklist-item">
+            + Lägg till delmoment
+        </button>
+    </section>
+
+    <button type="submit">Skapa uppgift</button>
+</form>

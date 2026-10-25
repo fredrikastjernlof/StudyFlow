@@ -101,86 +101,11 @@
     <section aria-labelledby="add-task-heading">
         <h2 id="add-task-heading">Lägg till uppgift</h2>
 
-        <form method="post" asp-page-handler="CreateTask" class="create-task-form" novalidate>
-            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("TaskInput.") || k ==
-    "checklistItems"))
-            {
-                <div class="validation-summary text-danger" role="alert" style="color:#b42318">
-                    <strong>Kontrollera följande:</strong>
-                    <ul>
-                        @foreach (var error in ViewData.ModelState.Where(kvp => kvp.Key.StartsWith("TaskInput.") || kvp.Key
-                    == "checklistItems").SelectMany(kvp => kvp.Value!.Errors).Select(e => e.ErrorMessage).Distinct())
-                        {
-                            <li>@error</li>
-                        }
-                    </ul>
-                </div>
-            }
-            else
-            {
-                <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
-            }
-            <div>
-                <label asp-for="TaskInput.Title">Uppgiftens namn</label>
-                <input asp-for="TaskInput.Title" maxlength="100" placeholder="Ange uppgiftens namn" />
-            </div>
-
-            <div>
-                <label asp-for="TaskInput.Description">Beskrivning</label>
-                <textarea asp-for="TaskInput.Description" rows="4" maxlength="1000"></textarea>
-            </div>
-
-            <div>
-                <label asp-for="TaskInput.Priority">Prioritet</label>
-                <select asp-for="TaskInput.Priority">
-                    <option value="1">Låg</option>
-                    <option value="2">Medel</option>
-                    <option value="3">Hög</option>
-                </select>
-            </div>
-
-            <div>
-                <label asp-for="TaskInput.EstimatedHours">
-                    Uppskattad arbetsinsats (timmar)
-                </label>
-                <input asp-for="TaskInput.EstimatedHours" type="number" min="0" max="1000" step="0.5" />
-            </div>
-
-            <div>
-                <label asp-for="TaskInput.Deadline">Deadline</label>
-                <input asp-for="TaskInput.Deadline" type="date" />
-            </div>
-
-            <section class="create-task-checklist">
-                <h3>Checklista</h3>
-
-                <label for="newChecklistItem">Lägg till delmoment (frivilligt)</label>
-
-                <div class="new-checklist-items">
-                    <div class="new-checklist-row">
-                        <input type="text" id="newChecklistItem" name="checklistItems" placeholder="Delmoment 1"
-                               maxlength="100" />
-                    </div>
-                    @if (ViewData["PostedChecklistItems"] is List<string> postedItems)
-                    {
-                        @foreach (var postedItem in postedItems)
-                        {
-                            <div class="new-checklist-row">
-                                <input type="text" name="checklistItems" value="@postedItem" maxlength="100" />
-                                <button type="button" class="remove-new-checklist-item">Ta bort</button>
-                            </div>
-                        }
-                    }
-                </div>
-                <p data-error-for="checklistItems" class="text-danger" role="alert"></p>
-                <button type="button" class="add-new-checklist-item">
-                    + Lägg till delmoment
-                </button>
-            </section>
-
-            <button type="submit">Skapa uppgift</button>
-        </form>
+        <partial name="_CreateTaskForm" model="Model.TaskInput" />
     </section>
 </main>
 
-<script src="~/js/course-details.js" asp-append-version="true"></script>
+@section Scripts {
+    <script src="~/js/task-form-validation.js" asp-append-version="true"></script>
+    <script src="~/js/course-details.js" asp-append-version="true"></script>
+}

@@ -13,7 +13,14 @@
         </button>
     </h3>
 
-    <p class="task-course-name">@task.Course?.Name</p>
+    @if (task.Course != null)
+    {
+        <p class="task-course-name">@task.Course.Name</p>
+    }
+    else
+    {
+        <p class="task-course-name">Fristående uppgift</p>
+    }
 
     <p>Prioritet:
         @(task.Priority == 3 ? "Hög" :

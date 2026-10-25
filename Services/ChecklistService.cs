@@ -17,7 +17,7 @@ public class ChecklistService
     // Update a checklist item's completion status.
     public async Task<bool> UpdateChecklistItemAsync(
         int itemId,
-        int courseId,
+        int? courseId,
         string userId,
         bool isCompleted)
     {
@@ -41,7 +41,7 @@ public class ChecklistService
     // Add a checklist item to a task owned by the user.
     public async Task<bool> AddChecklistItemAsync(
         int taskId,
-        int courseId,
+        int? courseId,
         string userId,
         string title)
     {
@@ -76,7 +76,7 @@ public class ChecklistService
     // Delete a checklist item belonging to the specified user and course.
     public async Task<bool> DeleteChecklistItemAsync(
         int itemId,
-        int courseId,
+        int? courseId,
         string userId)
     {
         var item = await _context.ChecklistItems
