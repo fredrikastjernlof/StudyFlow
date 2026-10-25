@@ -6,7 +6,7 @@ public class ChecklistItem
     public string Title { get; set; } = string.Empty;
     public bool IsCompleted { get; set; } = false;
 
-    // Every cheklist item belongs to a task.
+    // Every checklist item belongs to a task.
     public int StudyTaskId { get; set; }
     public StudyTask StudyTask { get; set; } = null!;
     

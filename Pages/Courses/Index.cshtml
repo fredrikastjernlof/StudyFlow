@@ -47,11 +47,8 @@ else
     <ul class="course-grid">
         @foreach (var course in Model.Courses)
         {
-            <li class="course-grid-item">
-                <a asp-page="./Details" asp-route-id="@course.Id" class="course-card" style="background-color: @course.Color;">
-                    <span>@course.Name</span>
-                </a>
-            </li>
+            @* Render a reusable course card. *@
+            <partial name="_CourseCard" model="course" />
         }
     </ul>
 }

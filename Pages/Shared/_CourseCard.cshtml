@@ -1,0 +1,15 @@
+@model StudyFlow.Models.Course
+
+@{
+    var course = Model;
+}
+
+@* Reusable course card linking to the course details page. *@
+<li class="course-grid-item">
+    <a asp-page="/Courses/Details"
+       asp-route-id="@course.Id"
+       class="course-card"
+       style="background-color: @course.Color;">
+        <span>@course.Name</span>
+    </a>
+</li>
