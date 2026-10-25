@@ -17,11 +17,16 @@ public class DetailsModel : PageModel
 {
     private readonly ApplicationDbContext _context;
     private readonly CourseService _courseService;
+    private readonly TaskService _taskService;
 
-    public DetailsModel(ApplicationDbContext context, CourseService courseService)
+    public DetailsModel(
+     ApplicationDbContext context,
+     CourseService courseService,
+     TaskService taskService)
     {
         _context = context;
         _courseService = courseService;
+        _taskService = taskService;
     }
 
     public Course Course { get; set; } = null!;
@@ -58,12 +63,8 @@ public class DetailsModel : PageModel
 
         Course = course;
 
-        // Load course tasks together with their checklist items.
-        Tasks = await _context.StudyTasks
-            .Include(t => t.ChecklistItems)
-            .Where(t => t.CourseId == id && t.UserId == userId)
-            .OrderBy(t => t.Deadline)
-            .ToListAsync();
+        // Load course tasks through the task service.
+        Tasks = await _taskService.GetCourseTasksAsync(id, userId!);
 
         // Populate the edit form with the course's current values.
         CourseName = course.Name;
@@ -101,9 +102,7 @@ public class DetailsModel : PageModel
 
         if (!ModelState.IsValid)
         {
-            Tasks = await _context.StudyTasks.Include(t => t.ChecklistItems)
-                .Where(t => t.CourseId == id && t.UserId == userId)
-                .OrderBy(t => t.Deadline).ToListAsync();
+            Tasks = await _taskService.GetCourseTasksAsync(id, userId!);
             return Page();
         }
 
@@ -168,40 +167,18 @@ public class DetailsModel : PageModel
             CourseName = course.Name;
             CourseColor = course.Color;
             ViewData["PostedChecklistItems"] = checklistItems.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            Tasks = await _context.StudyTasks.Include(t => t.ChecklistItems)
-                .Where(t => t.CourseId == id && t.UserId == userId)
-                .OrderBy(t => t.Deadline).ToListAsync();
+
+            Tasks = await _taskService.GetCourseTasksAsync(id, userId!);
+
             return Page();
         }
 
-        var task = new StudyTask
-        {
-            Title = TaskInput.Title.Trim(),
-            Description = TaskInput.Description ?? string.Empty,
-            Deadline = TaskInput.Deadline,
-            Priority = TaskInput.Priority,
-            EstimatedHours = TaskInput.EstimatedHours,
-            Status = "NotStarted",
-            CourseId = course.Id,
-            UserId = userId!
-        };
-
-        // Add checklist items to the new task.
-        foreach (var title in checklistItems)
-        {
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                continue;
-            }
-
-            task.ChecklistItems.Add(new ChecklistItem
-            {
-                Title = title.Trim()
-            });
-        }
-
-        _context.StudyTasks.Add(task);
-        await _context.SaveChangesAsync();
+        // Create the task and its checklist items through the task service.
+        await _taskService.CreateTaskAsync(
+            course.Id,
+            userId!,
+            TaskInput,
+            checklistItems);
 
         return RedirectToPage("./Details", new { id });
     }
@@ -212,19 +189,6 @@ public class DetailsModel : PageModel
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Find the task and verify that it belongs to the user and course.
-        var task = await _context.StudyTasks
-            .FirstOrDefaultAsync(t =>
-                t.Id == taskId &&
-                t.CourseId == id &&
-                t.UserId == userId);
-
-        if (task == null)
-        {
-            return NotFound();
-        }
-
-        // Only allow the three supported status values.
         if (status != "NotStarted" &&
             status != "InProgress" &&
             status != "Completed")
@@ -232,9 +196,14 @@ public class DetailsModel : PageModel
             return BadRequest();
         }
 
-        task.Status = status;
+        var updated = await _taskService.UpdateTaskStatusAsync(
+            taskId,
+            id,
+            userId!,
+            status);
 
-        await _context.SaveChangesAsync();
+        if (!updated)
+            return NotFound();
 
         return RedirectToPage("./Details", new { id });
     }
@@ -275,12 +244,10 @@ public class DetailsModel : PageModel
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        var task = await _context.StudyTasks
-            .Include(t => t.ChecklistItems)
-            .FirstOrDefaultAsync(t =>
-                t.Id == taskId &&
-                t.CourseId == id &&
-                t.UserId == userId);
+        var task = await _taskService.GetTaskByIdAsync(
+            taskId,
+            id,
+            userId!);
 
         if (task == null)
         {
@@ -309,37 +276,17 @@ public class DetailsModel : PageModel
             return BadRequest(string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(x => x.ErrorMessage)));
         }
 
-        task.Title = title.Trim();
-        task.Description = description ?? string.Empty;
-        task.Deadline = deadline;
-        task.Priority = priority;
-        task.EstimatedHours = estimatedHours;
-
-        // Remove checklist items deleted in the editor.
-        var removedItems = task.ChecklistItems
-            .Where(i => !itemIds.Contains(i.Id))
-            .ToList();
-
-        _context.ChecklistItems.RemoveRange(removedItems);
-
-        // Update existing checklist items.
-        for (int i = 0; i < itemIds.Count; i++)
-        {
-            var item = task.ChecklistItems.First(x => x.Id == itemIds[i]);
-            item.Title = itemTitles[i].Trim();
-        }
-
-        // Add new checklist items.
-        foreach (var itemTitle in newItemTitles)
-        {
-            _context.ChecklistItems.Add(new ChecklistItem
-            {
-                Title = itemTitle.Trim(),
-                StudyTaskId = task.Id
-            });
-        }
-
-        await _context.SaveChangesAsync();
+        // Save task changes through the task service.
+        await _taskService.UpdateTaskAsync(
+            task,
+            title,
+            description,
+            deadline,
+            priority,
+            estimatedHours,
+            itemIds,
+            itemTitles,
+            newItemTitles);
 
         return RedirectToPage("./Details", new { id });
     }
@@ -432,11 +379,15 @@ public class DetailsModel : PageModel
     public async Task<IActionResult> OnPostDeleteTaskAsync(int id, int taskId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var task = await _context.StudyTasks.FirstOrDefaultAsync(t =>
-            t.Id == taskId && t.CourseId == id && t.UserId == userId);
-        if (task == null) return NotFound();
-        _context.StudyTasks.Remove(task);
-        await _context.SaveChangesAsync();
+
+        var deleted = await _taskService.DeleteTaskAsync(
+            taskId,
+            id,
+            userId!);
+
+        if (!deleted)
+            return NotFound();
+
         return RedirectToPage("./Details", new { id });
     }
 

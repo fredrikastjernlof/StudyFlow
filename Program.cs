@@ -18,6 +18,9 @@ builder.Services.AddRazorPages();
 // Register the service for managing courses.
 builder.Services.AddScoped<CourseService>();
 
+// Register the service for managing study tasks.
+builder.Services.AddScoped<TaskService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
