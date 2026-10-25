@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using StudyFlow.Data;
 using StudyFlow.Models;
 using StudyFlow.ViewModels;
 using StudyFlow.Services;
@@ -15,18 +13,16 @@ namespace StudyFlow.Pages.Courses;
 [Authorize]
 public class DetailsModel : PageModel
 {
-    private readonly ApplicationDbContext _context;
+    
     private readonly CourseService _courseService;
     private readonly TaskService _taskService;
     private readonly ChecklistService _checklistService;
 
     public DetailsModel(
-        ApplicationDbContext context,
         CourseService courseService,
         TaskService taskService,
         ChecklistService checklistService)
     {
-        _context = context;
         _courseService = courseService;
         _taskService = taskService;
         _checklistService = checklistService;
@@ -82,8 +78,7 @@ public class DetailsModel : PageModel
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         // Find the course and verify ownership.
-        var course = await _context.Courses
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        var course = await _courseService.GetCourseByIdAsync(id, userId!);
 
         if (course == null)
         {
@@ -146,8 +141,7 @@ public class DetailsModel : PageModel
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        var course = await _context.Courses
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        var course = await _courseService.GetCourseByIdAsync(id, userId!);
 
         if (course == null)
         {
