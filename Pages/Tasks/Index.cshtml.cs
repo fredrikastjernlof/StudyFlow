@@ -15,19 +15,23 @@ public class IndexModel : PageModel
     private readonly TaskService _taskService;
     private readonly CourseService _courseService;
     private readonly ChecklistService _checklistService;
+    private readonly TaskPriorityService _taskPriorityService;
 
     public IndexModel(
      TaskService taskService,
      CourseService courseService,
-     ChecklistService checklistService)
+     ChecklistService checklistService,
+     TaskPriorityService taskPriorityService)
     {
         _taskService = taskService;
         _courseService = courseService;
         _checklistService = checklistService;
+        _taskPriorityService = taskPriorityService;
     }
 
     public List<StudyTask> Tasks { get; set; } = new();
     public List<Course> Courses { get; set; } = new();
+    public TaskPriorityResult? TodaysFocus { get; set; }
 
     [BindProperty]
     public StudyTaskInputModel TaskInput { get; set; } = new();
@@ -41,6 +45,7 @@ public class IndexModel : PageModel
     private async Task LoadPageDataAsync(string userId)
     {
         Tasks = await _taskService.GetUserTasksAsync(userId);
+        TodaysFocus = _taskPriorityService.GetTodaysFocus(Tasks);
         Courses = await _courseService.GetUserCoursesAsync(userId);
 
         ViewData["ShowCourseSelect"] = true;

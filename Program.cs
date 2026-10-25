@@ -24,6 +24,9 @@ builder.Services.AddScoped<TaskService>();
 // Register the service for managing checklistitems
 builder.Services.AddScoped<ChecklistService>();
 
+// Register the service for task prioritys
+builder.Services.AddScoped<TaskPriorityService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

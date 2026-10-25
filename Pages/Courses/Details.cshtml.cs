@@ -17,15 +17,18 @@ public class DetailsModel : PageModel
     private readonly CourseService _courseService;
     private readonly TaskService _taskService;
     private readonly ChecklistService _checklistService;
+    private readonly TaskPriorityService _taskPriorityService;
 
     public DetailsModel(
-        CourseService courseService,
-        TaskService taskService,
-        ChecklistService checklistService)
+    CourseService courseService,
+    TaskService taskService,
+    ChecklistService checklistService,
+    TaskPriorityService taskPriorityService)
     {
         _courseService = courseService;
         _taskService = taskService;
         _checklistService = checklistService;
+        _taskPriorityService = taskPriorityService;
     }
 
     public Course Course { get; set; } = null!;
@@ -47,6 +50,8 @@ public class DetailsModel : PageModel
 
     public List<StudyTask> Tasks { get; set; } = new();
 
+    public TaskPriorityResult? TodaysFocus { get; set; }
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         // Get the currently logged-in user's ID.
@@ -64,6 +69,7 @@ public class DetailsModel : PageModel
 
         // Load course tasks through the task service.
         Tasks = await _taskService.GetCourseTasksAsync(id, userId!);
+        TodaysFocus = _taskPriorityService.GetTodaysFocus(Tasks);
 
         // Populate the edit form with the course's current values.
         CourseName = course.Name;

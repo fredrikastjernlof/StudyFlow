@@ -5,12 +5,14 @@
     ViewData["Title"] = "Mina uppgifter";
 
     var inProgress = Model.Tasks
-        .Where(t => t.Status == "InProgress")
-        .ToList();
+    .Where(task => task.Status == "InProgress"
+        && task.Id != Model.TodaysFocus?.Task.Id)
+    .ToList();
 
     var comingUp = Model.Tasks
-        .Where(t => t.Status == "NotStarted")
-        .ToList();
+    .Where(task => task.Status == "NotStarted"
+        && task.Id != Model.TodaysFocus?.Task.Id)
+    .ToList();
 
     var completed = Model.Tasks
         .Where(t => t.Status == "Completed")
@@ -43,7 +45,17 @@
 
     <section class="tasks-book-page">
         <h2>Today's focus</h2>
-        <p>Prioriterad uppgift kommer att visas här.</p>
+
+        @if (Model.TodaysFocus != null)
+        {
+            <ul>
+                <partial name="_TaskCard" model="Model.TodaysFocus.Task" />
+            </ul>
+        }
+        else
+        {
+            <p>Inga uppgifter att prioritera just nu.</p>
+        }
 
         <h2>Work in progress</h2>
 

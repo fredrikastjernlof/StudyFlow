@@ -66,10 +66,31 @@
     <section aria-labelledby="tasks-heading">
         <h2 id="tasks-heading">Uppgifter</h2>
 
-        @if (Model.Tasks.Any())
+        <h3>Today's focus</h3>
+
+        @if (Model.TodaysFocus != null)
         {
             <ul>
-                @foreach (var task in Model.Tasks)
+                <partial name="_TaskCard" model="Model.TodaysFocus.Task" />
+            </ul>
+        }
+        else
+        {
+            <p>Inga uppgifter att prioritera just nu.</p>
+        }
+
+        <h3>Övriga uppgifter</h3>
+
+        @{
+            var otherTasks = Model.Tasks
+                .Where(task => task.Id != Model.TodaysFocus?.Task.Id)
+                .ToList();
+        }
+
+        @if (otherTasks.Any())
+        {
+            <ul>
+                @foreach (var task in otherTasks)
                 {
                     @* Render a reusable task card for each task. *@
                     <partial name="_TaskCard" model="task" />
@@ -78,7 +99,7 @@
         }
         else
         {
-            <p>Inga uppgifter har lagts till i den här kursen ännu.</p>
+            <p>Inga övriga uppgifter att visa.</p>
         }
     </section>
 
