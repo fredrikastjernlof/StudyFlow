@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyFlow.Data;
 using StudyFlow.Models;
 using StudyFlow.ViewModels;
+using StudyFlow.Services;
 
 
 namespace StudyFlow.Pages.Courses;
@@ -15,10 +16,12 @@ namespace StudyFlow.Pages.Courses;
 public class DetailsModel : PageModel
 {
     private readonly ApplicationDbContext _context;
+    private readonly CourseService _courseService;
 
-    public DetailsModel(ApplicationDbContext context)
+    public DetailsModel(ApplicationDbContext context, CourseService courseService)
     {
         _context = context;
+        _courseService = courseService;
     }
 
     public Course Course { get; set; } = null!;
@@ -45,9 +48,8 @@ public class DetailsModel : PageModel
         // Get the currently logged-in user's ID.
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Find the course and verify that it belongs to the user.
-        var course = await _context.Courses
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        // Find the course through the course service.
+        var course = await _courseService.GetCourseByIdAsync(id, userId!);
 
         if (course == null)
         {
@@ -105,33 +107,34 @@ public class DetailsModel : PageModel
             return Page();
         }
 
-        // Update and save the course.
-        course.Name = CourseName.Trim();
-        course.Color = CourseColor;
+        // Update the course through the course service.
+        var updated = await _courseService.UpdateCourseAsync(
+            id, userId!, CourseName, CourseColor);
 
-        await _context.SaveChangesAsync();
-
-        return RedirectToPage("./Details", new { id = course.Id });
-    }
-
-    // Delete a course and its related tasks and checklist items.
-    public async Task<IActionResult> OnPostDeleteAsync(int id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // Find the course and verify that it belongs to the user.
-        var course = await _context.Courses
-            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
-
-        if (course == null)
+        if (!updated)
         {
             return NotFound();
         }
 
-        // Related tasks and checklist items are deleted through cascade delete.
-        _context.Courses.Remove(course);
+        return RedirectToPage("./Details", new { id = course.Id });
+    }
 
-        await _context.SaveChangesAsync();
+    // Delete a course through the course service.
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var deleted = await _courseService.DeleteCourseAsync(id, userId);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
 
         // Return to the course overview after deletion.
         return RedirectToPage("./Index");
