@@ -32,6 +32,17 @@ public class TaskService
         StudyTaskInputModel input,
         List<string> checklistItems)
     {
+
+        // Verify that the course belongs to the user.
+        var courseExists = await _context.Courses
+            .AnyAsync(c => c.Id == courseId && c.UserId == userId);
+
+        if (!courseExists)
+        {
+            throw new UnauthorizedAccessException(
+                "The course does not exist or does not belong to the user.");
+        }
+
         var task = new StudyTask
         {
             Title = input.Title.Trim(),
@@ -122,8 +133,10 @@ public class TaskService
     }
 
     // Update task details and synchronize checklist items.
-    public async Task UpdateTaskAsync(
-        StudyTask task,
+    public async Task<bool> UpdateTaskAsync(
+        int taskId,
+        int courseId,
+        string userId,
         string title,
         string? description,
         DateTime? deadline,
@@ -133,6 +146,22 @@ public class TaskService
         List<string> itemTitles,
         List<string> newItemTitles)
     {
+
+        // Load the task and verify ownership.
+        var task = await GetTaskByIdAsync(taskId, courseId, userId);
+
+        if (task == null)
+        {
+            return false;
+        }
+
+        // Verify that all submitted checklist items belong to this task.
+        if (itemIds.Count != itemTitles.Count ||
+            itemIds.Count != itemIds.Distinct().Count() ||
+            itemIds.Any(itemId => task.ChecklistItems.All(i => i.Id != itemId)))
+        {
+            return false;
+        }
         task.Title = title.Trim();
         task.Description = description ?? string.Empty;
         task.Deadline = deadline;
@@ -164,5 +193,7 @@ public class TaskService
         }
 
         await _context.SaveChangesAsync();
+        
+        return true;
     }
 }

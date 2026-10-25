@@ -1,6 +1,8 @@
+
 using Microsoft.EntityFrameworkCore;
 using StudyFlow.Data;
 using StudyFlow.Models;
+using System.Text.RegularExpressions;
 
 namespace StudyFlow.Services;
 
@@ -8,7 +10,6 @@ public class CourseService
 {
     private readonly ApplicationDbContext _context;
 
-    // Inject the database context.
     public CourseService(ApplicationDbContext context)
     {
         _context = context;
@@ -18,6 +19,7 @@ public class CourseService
     public async Task<List<Course>> GetUserCoursesAsync(string userId)
     {
         return await _context.Courses
+            .AsNoTracking()
             .Where(c => c.UserId == userId)
             .OrderBy(c => c.Name)
             .ToListAsync();
@@ -27,14 +29,36 @@ public class CourseService
     public async Task<Course?> GetCourseByIdAsync(int courseId, string userId)
     {
         return await _context.Courses
-            .FirstOrDefaultAsync(c => c.Id == courseId && c.UserId == userId);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c =>
+                c.Id == courseId && c.UserId == userId);
+    }
+
+    // Create a new course for the specified user.
+    public async Task CreateCourseAsync(string userId, string name, string color)
+    {
+        ValidateCourse(name, color);
+
+        var course = new Course
+        {
+            Name = name.Trim(),
+            Color = color,
+            UserId = userId
+        };
+
+        _context.Courses.Add(course);
+        await _context.SaveChangesAsync();
     }
 
     // Update a course only if it belongs to the specified user.
     public async Task<bool> UpdateCourseAsync(
         int courseId, string userId, string name, string color)
     {
-        var course = await GetCourseByIdAsync(courseId, userId);
+        ValidateCourse(name, color);
+
+        var course = await _context.Courses
+            .FirstOrDefaultAsync(c =>
+                c.Id == courseId && c.UserId == userId);
 
         if (course == null)
         {
@@ -52,7 +76,9 @@ public class CourseService
     // Delete a course only if it belongs to the specified user.
     public async Task<bool> DeleteCourseAsync(int courseId, string userId)
     {
-        var course = await GetCourseByIdAsync(courseId, userId);
+        var course = await _context.Courses
+            .FirstOrDefaultAsync(c =>
+                c.Id == courseId && c.UserId == userId);
 
         if (course == null)
         {
@@ -65,18 +91,18 @@ public class CourseService
         return true;
     }
 
-    // Create a new course for the specified user.
-    public async Task CreateCourseAsync(string userId, string name, string color)
+    // Validate course data before saving it.
+    private static void ValidateCourse(string? name, string? color)
     {
-        var course = new Course
+        if (string.IsNullOrWhiteSpace(name) || name.Trim().Length > 100)
         {
-            Name = name.Trim(),
-            Color = color,
-            UserId = userId
-        };
+            throw new ArgumentException("Invalid course name.", nameof(name));
+        }
 
-        _context.Courses.Add(course);
-        await _context.SaveChangesAsync();
+        if (string.IsNullOrWhiteSpace(color) ||
+            !Regex.IsMatch(color, "^#[0-9A-Fa-f]{6}$"))
+        {
+            throw new ArgumentException("Invalid course color.", nameof(color));
+        }
     }
 }
-

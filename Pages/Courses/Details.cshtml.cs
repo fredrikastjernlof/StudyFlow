@@ -13,7 +13,7 @@ namespace StudyFlow.Pages.Courses;
 [Authorize]
 public class DetailsModel : PageModel
 {
-    
+
     private readonly CourseService _courseService;
     private readonly TaskService _taskService;
     private readonly ChecklistService _checklistService;
@@ -266,8 +266,10 @@ public class DetailsModel : PageModel
         }
 
         // Save task changes through the task service.
-        await _taskService.UpdateTaskAsync(
-            task,
+        var updated = await _taskService.UpdateTaskAsync(
+            taskId,
+            id,
+            userId!,
             title,
             description,
             deadline,
@@ -276,6 +278,11 @@ public class DetailsModel : PageModel
             itemIds,
             itemTitles,
             newItemTitles);
+
+        if (!updated)
+        {
+            return BadRequest("Uppgiften kunde inte uppdateras.");
+        }
 
         return RedirectToPage("./Details", new { id });
     }

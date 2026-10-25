@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using StudyFlow.Data;
 using StudyFlow.Models;
@@ -8,13 +9,12 @@ public class ChecklistService
 {
     private readonly ApplicationDbContext _context;
 
-    // Inject the database context.
     public ChecklistService(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    // Update the completion status of a checklist item.
+    // Update a checklist item's completion status.
     public async Task<bool> UpdateChecklistItemAsync(
         int itemId,
         int courseId,
@@ -22,14 +22,15 @@ public class ChecklistService
         bool isCompleted)
     {
         var item = await _context.ChecklistItems
-            .Include(i => i.StudyTask)
             .FirstOrDefaultAsync(i =>
                 i.Id == itemId &&
                 i.StudyTask.CourseId == courseId &&
                 i.StudyTask.UserId == userId);
 
         if (item == null)
+        {
             return false;
+        }
 
         item.IsCompleted = isCompleted;
         await _context.SaveChangesAsync();
@@ -44,18 +45,26 @@ public class ChecklistService
         string userId,
         string title)
     {
-        var task = await _context.StudyTasks.FirstOrDefaultAsync(t =>
-            t.Id == taskId &&
-            t.CourseId == courseId &&
-            t.UserId == userId);
+        if (string.IsNullOrWhiteSpace(title) || title.Trim().Length > 100)
+        {
+            throw new ArgumentException("Invalid checklist item title.", nameof(title));
+        }
 
-        if (task == null)
+        var taskExists = await _context.StudyTasks
+            .AnyAsync(t =>
+                t.Id == taskId &&
+                t.CourseId == courseId &&
+                t.UserId == userId);
+
+        if (!taskExists)
+        {
             return false;
+        }
 
         var item = new ChecklistItem
         {
             Title = title.Trim(),
-            StudyTaskId = task.Id
+            StudyTaskId = taskId
         };
 
         _context.ChecklistItems.Add(item);
@@ -71,14 +80,15 @@ public class ChecklistService
         string userId)
     {
         var item = await _context.ChecklistItems
-            .Include(i => i.StudyTask)
             .FirstOrDefaultAsync(i =>
                 i.Id == itemId &&
                 i.StudyTask.CourseId == courseId &&
                 i.StudyTask.UserId == userId);
 
         if (item == null)
+        {
             return false;
+        }
 
         _context.ChecklistItems.Remove(item);
         await _context.SaveChangesAsync();
