@@ -1,0 +1,19 @@
+@model StudyFlow.Models.StudyTask
+
+@{
+    var task = Model;
+}
+
+@* Confirm permanent deletion of a task and its checklist items. *@
+<dialog id="deleteTaskDialog-@task.Id" aria-labelledby="deleteTaskHeading-@task.Id">
+    <h2 id="deleteTaskHeading-@task.Id">Ta bort uppgift?</h2>
+
+    <p>Är du säker på att du vill ta bort <strong>@task.Title</strong> och dess delmoment permanent?</p>
+
+    <form method="post" asp-page-handler="DeleteTask">
+        <input type="hidden" name="taskId" value="@task.Id" />
+
+        <button type="button" class="cancel-delete-task">Avbryt</button>
+        <button type="submit">Ja, ta bort uppgift</button>
+    </form>
+</dialog>

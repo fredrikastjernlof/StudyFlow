@@ -8,8 +8,11 @@
 <dialog id="editTaskDialog-@task.Id" aria-labelledby="editTaskHeading-@task.Id">
     <h2 id="editTaskHeading-@task.Id">Redigera uppgift</h2>
 
+    @* Form for editing an existing task. *@
     <form method="post" asp-page-handler="EditTask" class="edit-task-form" novalidate>
         <input type="hidden" name="taskId" value="@task.Id" />
+
+        @* Displays validation errors handled by JavaScript. *@
         <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
 
         <div>
@@ -48,6 +51,8 @@
             <h3>Redigera checklista</h3>
 
             <div class="edit-checklist-items">
+
+                @* Render existing checklist items for editing. *@
                 @foreach (var item in task.ChecklistItems.OrderBy(i => i.Id))
                 {
                     <button type="button" class="remove-checklist-row">
