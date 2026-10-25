@@ -1,10 +1,169 @@
 ﻿@page
 @model IndexModel
+
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = User.Identity?.IsAuthenticated == true
+        ? "Dashboard"
+        : "Välkommen till StudyFlow";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <main class="dashboard">
+
+        <h1>My dashboard</h1>
+
+        <div class="dashboard-book">
+
+            <!-- LEFT PAGE -->
+            <section class="dashboard-book-page">
+
+                <h2>Today's focus</h2>
+
+                @if (Model.TodaysFocus != null)
+                {
+                    var task = Model.TodaysFocus.Task;
+                    var checklist = task.ChecklistItems.ToList();
+                    var completedItems = checklist.Count(item => item.IsCompleted);
+                    var progress = checklist.Count > 0
+                        ? (int)Math.Round(100.0 * completedItems / checklist.Count)
+                        : 0;
+
+                    <article class="dashboard-focus">
+
+                        <h3>@task.Title</h3>
+
+                        <p>
+                            @(task.Course?.Name ?? "Fristående uppgift")
+                        </p>
+
+                        @if (task.Deadline.HasValue)
+                        {
+                            <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
+                        }
+
+                        <h4>My checklist</h4>
+
+                        @if (checklist.Any())
+                        {
+                            <ul class="dashboard-checklist">
+                                @foreach (var item in checklist)
+                                {
+                                    <li>
+                                        <input type="checkbox"
+                                               checked="@item.IsCompleted"
+                                               disabled />
+                                        <span>@item.Title</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>Inga delmoment har lagts till.</p>
+                        }
+
+                        <h4>Progress</h4>
+
+                        <progress value="@progress" max="100"></progress>
+                        <p>@progress % klart</p>
+
+                    </article>
+                }
+                else
+                {
+                    <p>Inga uppgifter att prioritera just nu.</p>
+                }
+
+                <section class="dashboard-completed">
+                    <h2>All the small things</h2>
+                    <p>Du har slutfört @Model.CompletedTaskCount uppgifter!</p>
+                </section>
+
+            </section>
+
+            <!-- RIGHT PAGE -->
+            <section class="dashboard-book-page">
+
+                <h2>Coming up</h2>
+
+                @if (Model.ComingUp.Any())
+                {
+                    <div class="dashboard-upcoming">
+                        @foreach (var task in Model.ComingUp)
+                        {
+                            <article class="dashboard-note">
+                                <h3>@task.Title</h3>
+
+                                <p>@(task.Course?.Name ?? "Fristående uppgift")</p>
+
+                                @if (task.Deadline.HasValue)
+                                {
+                                    <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
+                                }
+                            </article>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>Inga kommande uppgifter.</p>
+                }
+
+                <section class="dashboard-courses">
+
+                    <h2>My little study corner</h2>
+
+                    @if (Model.Courses.Any())
+                    {
+                        <div class="dashboard-course-list">
+                            @foreach (var course in Model.Courses)
+                            {
+                                <a asp-page="/Courses/Details"
+                                   asp-route-id="@course.Id"
+                                   class="dashboard-course-note">
+                                    @course.Name
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p>Du har inte lagt till några kurser ännu.</p>
+                    }
+
+                    <a asp-page="/Courses/Index">Visa alla kurser</a>
+
+                </section>
+
+            </section>
+
+        </div>
+
+    </main>
+}
+else
+{
+    <main class="welcome-page">
+
+        <h1>Välkommen till StudyFlow!</h1>
+
+        <p>
+            Planera dina studier, organisera dina uppgifter
+            och håll koll på dina framsteg – allt på ett ställe.
+        </p>
+
+        <div class="welcome-actions">
+            <a asp-area="Identity"
+               asp-page="/Account/Login">
+                Logga in
+            </a>
+
+            <a asp-area="Identity"
+               asp-page="/Account/Register">
+                Skapa konto
+            </a>
+        </div>
+
+    </main>
+}
