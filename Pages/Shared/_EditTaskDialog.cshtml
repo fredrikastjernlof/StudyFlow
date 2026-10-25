@@ -1,0 +1,71 @@
+@* Recieve the task to edit.*@
+@model StudyFlow.Models.StudyTask
+
+@{
+    var task = Model;
+}
+ 
+<dialog id="editTaskDialog-@task.Id" aria-labelledby="editTaskHeading-@task.Id">
+    <h2 id="editTaskHeading-@task.Id">Redigera uppgift</h2>
+
+    <form method="post" asp-page-handler="EditTask" class="edit-task-form" novalidate>
+        <input type="hidden" name="taskId" value="@task.Id" />
+        <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
+
+        <div>
+            <label for="editTitle-@task.Id">Uppgiftens namn</label>
+            <input id="editTitle-@task.Id" name="title" value="@task.Title" maxlength="100" />
+        </div>
+
+        <div>
+            <label for="editDescription-@task.Id">Beskrivning</label>
+            <textarea id="editDescription-@task.Id" name="description" rows="4"
+                      maxlength="1000">@task.Description</textarea>
+        </div>
+
+        <div>
+            <label for="editDeadline-@task.Id">Deadline</label>
+            <input id="editDeadline-@task.Id" name="deadline" type="date"
+                   value="@(task.Deadline?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <div>
+            <label for="editPriority-@task.Id">Prioritet</label>
+            <select id="editPriority-@task.Id" name="priority">
+                <option value="1" selected="@(task.Priority == 1)">Låg</option>
+                <option value="2" selected="@(task.Priority == 2)">Medel</option>
+                <option value="3" selected="@(task.Priority == 3)">Hög</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="editHours-@task.Id">Uppskattad arbetsinsats (timmar)</label>
+            <input id="editHours-@task.Id" name="estimatedHours" type="number" min="0" max="1000" step="0.5"
+                   value="@task.EstimatedHours" />
+        </div>
+
+        <section>
+            <h3>Redigera checklista</h3>
+
+            <div class="edit-checklist-items">
+                @foreach (var item in task.ChecklistItems.OrderBy(i => i.Id))
+                {
+                    <button type="button" class="remove-checklist-row">
+                        Ta bort
+                    </button>
+                    <div class="edit-checklist-row">
+                        <input type="hidden" name="itemIds" value="@item.Id" />
+                        <input type="text" name="itemTitles" value="@item.Title" maxlength="100" aria-label="Delmoment" />
+                    </div>
+                }
+            </div>
+
+            <button type="button" class="add-checklist-row">
+                Lägg till delmoment
+            </button>
+        </section>
+
+        <button type="submit">Spara ändringar</button>
+        <button type="button" class="close-edit-task-dialog">Avbryt</button>
+    </form>
+</dialog>

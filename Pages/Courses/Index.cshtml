@@ -11,7 +11,9 @@
     + Lägg till kurs
 </button>
 
-<dialog id="courseDialog" aria-labelledby="courseDialogTitle">
+<dialog id="courseDialog"
+        aria-labelledby="courseDialogTitle"
+        data-validation-error="@(!ViewData.ModelState.IsValid)">
     <h2 id="courseDialogTitle">Lägg till kurs</h2>
 
     <form method="post">
@@ -34,30 +36,7 @@
     </button>
 </dialog>
 
-<script>
-    const courseDialog = document.getElementById("courseDialog");
-
-    document.getElementById("openCourseDialog").addEventListener("click", () => {
-        courseDialog.showModal();
-    });
-
-    document.getElementById("closeCourseDialog").addEventListener("click", () => {
-        courseDialog.close();
-    });
-
-    courseDialog.addEventListener("click", (event) => {
-        if (event.target === courseDialog) {
-            courseDialog.close();
-        }
-    });
-
-    @if (!ViewData.ModelState.IsValid)
-        {
-            <text>
-                    courseDialog.showModal();
-            </text>
-    }
-</script>
+<script src="~/js/courses.js" asp-append-version="true"></script>
 
 @if (Model.Courses.Count == 0)
 {
