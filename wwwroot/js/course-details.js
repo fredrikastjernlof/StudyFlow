@@ -219,34 +219,51 @@ document.querySelectorAll(".edit-task-form").forEach(form => {
     });
 });
 
-// Add and remove checklist fields. Show errors inline, never in a popup.
+// Add and remove checklist fields using the shared form validation.
 const newChecklistContainer = document.querySelector(".new-checklist-items");
-const newChecklistError = document.querySelector('[data-error-for="checklistItems"]');
+const createTaskForm = newChecklistContainer.closest("form");
+let checklistAddAttempted = false;
+
 const clearNewChecklistError = () => {
-    if ([...newChecklistContainer.querySelectorAll('input[name="checklistItems"]')]
-        .every(input => input.value.trim())) newChecklistError.textContent = "";
+    const inputs = [...newChecklistContainer.querySelectorAll('input[name="checklistItems"]')];
+
+    if (inputs.every(input => input.value.trim())) {
+        checklistAddAttempted = false;
+    }
+
+    if (!createTaskForm.querySelector(".validation-summary").hidden) {
+        validateTaskForm(createTaskForm, false, checklistAddAttempted);
+    }
 };
 
 document.querySelector(".add-new-checklist-item").addEventListener("click", () => {
     const inputs = [...newChecklistContainer.querySelectorAll('input[name="checklistItems"]')];
     const empty = inputs.find(input => !input.value.trim());
+
     if (empty) {
-        newChecklistError.textContent = "Fyll i delmomentet innan du lägger till ett nytt.";
+        checklistAddAttempted = true;
+        validateTaskForm(createTaskForm, false, true);
         empty.focus();
         return;
     }
-    newChecklistError.textContent = "";
+
+    checklistAddAttempted = false;
+
     const row = document.createElement("div");
     row.className = "new-checklist-row";
     row.innerHTML = `<input type="text" name="checklistItems" placeholder="Nytt delmoment" maxlength="100" />
-            <button type="button" class="remove-new-checklist-item">Ta bort</button>`;
+        <button type="button" class="remove-new-checklist-item">Ta bort</button>`;
+
     newChecklistContainer.appendChild(row);
     row.querySelector("input").focus();
 });
+
 newChecklistContainer.addEventListener("input", clearNewChecklistError);
+
 newChecklistContainer.addEventListener("click", event => {
     const button = event.target.closest(".remove-new-checklist-item");
     if (!button) return;
+
     button.closest(".new-checklist-row").remove();
     clearNewChecklistError();
 });
@@ -271,7 +288,7 @@ if (document.querySelector("main").dataset.taskInputError === "True") {
 }
 
 // Validate task forms before posting. Native POST remains unchanged.
-function validateTaskForm(form, edit) {
+function validateTaskForm(form, edit, requireNamedChecklist = false) {
     const field = name => form.elements.namedItem(edit ? name : `TaskInput.${name.charAt(0).toUpperCase()}${name.slice(1)}`);
     const errors = {};
     const title = field("title")?.value.trim() ?? "";
@@ -295,11 +312,17 @@ function validateTaskForm(form, edit) {
     }
     if (edit) {
         if ([...form.querySelectorAll('input[name="itemTitles"], input[name="newItemTitles"]')]
-            .some(input => !input.value.trim() || input.value.trim().length > 100))
+            .some(input => !input.value.trim() || input.value.trim().length > 100)) {
             errors.checklist = "Delmoment måste innehålla 1–100 tecken.";
-    } else if ([...form.querySelectorAll('input[name="checklistItems"]')]
-        .some(input => input.value.trim().length > 100)) {
-        errors.checklistItems = "Delmoment får innehålla högst 100 tecken.";
+        }
+    } else {
+        const checklistInputs = [...form.querySelectorAll('input[name="checklistItems"]')];
+
+        if (checklistInputs.some(input => input.value.trim().length > 100)) {
+            errors.checklistItems = "Delmoment får innehålla högst 100 tecken.";
+        } else if (requireNamedChecklist && checklistInputs.some(input => !input.value.trim())) {
+            errors.checklistItems = "Fyll i delmomentet innan du lägger till ett nytt.";
+        }
     }
     updateValidationSummary(form, errors);
     return Object.keys(errors).length === 0;

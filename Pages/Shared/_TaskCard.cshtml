@@ -1,0 +1,55 @@
+@* Each task card receives a StudyTask object. *@
+@model StudyFlow.Models.StudyTask
+
+@{
+    var task = Model;
+}
+
+@* Display the task title, course, priority and deadline. *@
+<li>
+    <h3>
+        <button type="button" class="task-details-button" data-task-id="@task.Id">
+            @task.Title
+        </button>
+    </h3>
+
+    <p class="task-course-name">@task.Course?.Name</p>
+
+    <p>Prioritet:
+        @(task.Priority == 3 ? "Hög" :
+          task.Priority == 2 ? "Medel" : "Låg")
+    </p>
+
+    @if (task.Deadline.HasValue)
+    {
+        <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
+    }
+
+    @* Show the checklist only if the task has checklist items. *@
+    @if (task.ChecklistItems.Any())
+    {
+        var completed = task.ChecklistItems.Count(item => item.IsCompleted);
+        var total = task.ChecklistItems.Count;
+
+        <div class="task-card-checklist">
+            <ul>
+                @foreach (var item in task.ChecklistItems.OrderBy(item => item.IsCompleted).ThenBy(item =>
+    item.Id))
+                {
+                    <li data-order="@item.Id">
+                        <label>
+                            <input type="checkbox" class="checklist-checkbox" data-item-id="@item.Id"
+                                   checked="@item.IsCompleted" />
+                            @item.Title
+                        </label>
+                    </li>
+                }
+            </ul>
+
+            @* Display completed items and overall checklist progress. *@
+            <p class="checklist-count">@completed/@total done</p>
+            <progress class="checklist-progress" value="@completed" max="@total">
+            </progress>
+        </div>
+    }
+</li>

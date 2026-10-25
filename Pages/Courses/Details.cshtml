@@ -71,51 +71,8 @@
             <ul>
                 @foreach (var task in Model.Tasks)
                 {
-                    <li>
-                        <h3>
-                            <button type="button" class="task-details-button" data-task-id="@task.Id">
-                                @task.Title
-                            </button>
-                        </h3>
-
-                        <p class="task-course-name">@Model.Course.Name</p>
-
-                        <p>Prioritet:
-                            @(task.Priority == 3 ? "Hög" :
-                              task.Priority == 2 ? "Medel" : "Låg")
-                        </p>
-
-                        @if (task.Deadline.HasValue)
-                        {
-                            <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
-                        }
-
-                        @if (task.ChecklistItems.Any())
-                        {
-                            var completed = task.ChecklistItems.Count(item => item.IsCompleted);
-                            var total = task.ChecklistItems.Count;
-
-                            <div class="task-card-checklist">
-                                <ul>
-                                    @foreach (var item in task.ChecklistItems.OrderBy(item => item.IsCompleted).ThenBy(item =>
-                        item.Id))
-                                    {
-                                        <li data-order="@item.Id">
-                                            <label>
-                                                <input type="checkbox" class="checklist-checkbox" data-item-id="@item.Id"
-                                                       checked="@item.IsCompleted" />
-                                                @item.Title
-                                            </label>
-                                        </li>
-                                    }
-                                </ul>
-
-                                <p class="checklist-count">@completed/@total done</p>
-                                <progress class="checklist-progress" value="@completed" max="@total">
-                                </progress>
-                            </div>
-                        }
-                    </li>
+                    @* Render a reusable task card for each task. *@
+                    <partial name="_TaskCard" model="task" />
                 }
             </ul>
         }
@@ -127,90 +84,7 @@
 
     @foreach (var task in Model.Tasks)
     {
-        var completedItems = task.ChecklistItems.Count(i => i.IsCompleted);
-        var totalItems = task.ChecklistItems.Count;
-
-        <dialog id="taskDialog-@task.Id" aria-labelledby="taskHeading-@task.Id">
-            <h2 id="taskHeading-@task.Id">@task.Title</h2>
-            <p>@task.Description</p>
-            <p>Uppskattad arbetsinsats: @task.EstimatedHours timmar</p>
-
-            <p>Prioritet:
-                @(task.Priority == 3 ? "Hög" :
-                  task.Priority == 2 ? "Medel" : "Låg")
-            </p>
-
-            <form method="post" asp-page-handler="UpdateTaskStatus" class="task-status-form">
-                <input type="hidden" name="taskId" value="@task.Id" />
-                <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
-
-                <div>
-                    <label for="taskStatus-@task.Id">Status</label>
-
-                    <select id="taskStatus-@task.Id" name="status" class="task-status-select">
-                        <option value="NotStarted" selected="@(task.Status == "NotStarted")">
-                            Ej påbörjad
-                        </option>
-                        <option value="InProgress" selected="@(task.Status == "InProgress")">
-                            Pågående
-                        </option>
-                        <option value="Completed" selected="@(task.Status == "Completed")">
-                            Avklarad
-                        </option>
-                    </select>
-                </div>
-            </form>
-
-            @if (task.Deadline.HasValue)
-            {
-                <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
-            }
-
-            <hr />
-
-            <section aria-labelledby="checklistHeading-@task.Id">
-                <h3 id="checklistHeading-@task.Id">Checklista</h3>
-
-                @if (totalItems > 0)
-                {
-                    <ul>
-                        @foreach (var item in task.ChecklistItems.OrderBy(i => i.IsCompleted).ThenBy(i => i.Id))
-                        {
-                            <li data-order="@item.Id">
-                                <label>
-                                    <input type="checkbox" class="checklist-checkbox" data-item-id="@item.Id"
-                                           checked="@item.IsCompleted" />
-                                    @item.Title
-                                </label>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>Inga delmoment har lagts till ännu.</p>
-                }
-            </section>
-
-            <section aria-label="Checklistans framsteg">
-                <div>
-                    <strong>Making progress!</strong>
-                    <span class="checklist-count">@completedItems/@totalItems done</span>
-                </div>
-
-                <progress class="checklist-progress" value="@completedItems" max="@(totalItems > 0 ? totalItems : 1)"
-                          aria-label="Avklarade delmoment">
-                </progress>
-            </section>
-
-            <button type="button" class="open-edit-task-dialog" data-task-id="@task.Id">
-                Redigera
-            </button>
-            <button type="button" class="open-delete-task-dialog" data-task-id="@task.Id">Ta bort uppgift</button>
-            <button type="button" class="close-task-dialog">
-                Stäng
-            </button>
-        </dialog>
+       <partial name="_TaskDetailsDialog" model="task" />
     }
 
     @foreach (var task in Model.Tasks)
@@ -369,6 +243,7 @@
                         }
                     }
                 </div>
+                <p data-error-for="checklistItems" class="text-danger" role="alert"></p>
                 <button type="button" class="add-new-checklist-item">
                     + Lägg till delmoment
                 </button>
