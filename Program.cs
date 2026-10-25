@@ -21,6 +21,9 @@ builder.Services.AddScoped<CourseService>();
 // Register the service for managing study tasks.
 builder.Services.AddScoped<TaskService>();
 
+// Register the service for managing checklistitems
+builder.Services.AddScoped<ChecklistService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

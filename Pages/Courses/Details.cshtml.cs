@@ -18,15 +18,18 @@ public class DetailsModel : PageModel
     private readonly ApplicationDbContext _context;
     private readonly CourseService _courseService;
     private readonly TaskService _taskService;
+    private readonly ChecklistService _checklistService;
 
     public DetailsModel(
-     ApplicationDbContext context,
-     CourseService courseService,
-     TaskService taskService)
+        ApplicationDbContext context,
+        CourseService courseService,
+        TaskService taskService,
+        ChecklistService checklistService)
     {
         _context = context;
         _courseService = courseService;
         _taskService = taskService;
+        _checklistService = checklistService;
     }
 
     public Course Course { get; set; } = null!;
@@ -210,26 +213,18 @@ public class DetailsModel : PageModel
 
     // Update a checklist item's completion status.
     public async Task<IActionResult> OnPostUpdateChecklistItemAsync(
-        int id, int itemId, bool isCompleted)
+     int id, int itemId, bool isCompleted)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Find the item and verify that its task belongs to the user and course.
-        var item = await _context.ChecklistItems
-            .Include(i => i.StudyTask)
-            .FirstOrDefaultAsync(i =>
-                i.Id == itemId &&
-                i.StudyTask.CourseId == id &&
-                i.StudyTask.UserId == userId);
+        var updated = await _checklistService.UpdateChecklistItemAsync(
+            itemId,
+            id,
+            userId!,
+            isCompleted);
 
-        if (item == null)
-        {
+        if (!updated)
             return NotFound();
-        }
-
-        item.IsCompleted = isCompleted;
-
-        await _context.SaveChangesAsync();
 
         return new JsonResult(new { success = true });
     }
@@ -293,63 +288,42 @@ public class DetailsModel : PageModel
 
     // Add a checklist item to an existing study task.
     public async Task<IActionResult> OnPostAddChecklistItemAsync(
-        int id, int taskId, string title)
+    int id, int taskId, string title)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Verify that the task belongs to the current user and course.
-        var task = await _context.StudyTasks
-            .FirstOrDefaultAsync(t =>
-                t.Id == taskId &&
-                t.CourseId == id &&
-                t.UserId == userId);
-
-        if (task == null)
-        {
-            return NotFound();
-        }
-
         if (string.IsNullOrWhiteSpace(title) || title.Trim().Length > 100)
-        {
             return BadRequest();
-        }
 
-        var item = new ChecklistItem
-        {
-            Title = title.Trim(),
-            StudyTaskId = task.Id
-        };
+        var added = await _checklistService.AddChecklistItemAsync(
+            taskId,
+            id,
+            userId!,
+            title);
 
-        _context.ChecklistItems.Add(item);
-        await _context.SaveChangesAsync();
+        if (!added)
+            return NotFound();
 
         return RedirectToPage("./Details", new { id });
     }
 
     // Delete a checklist item from an existing study task.
     public async Task<IActionResult> OnPostDeleteChecklistItemAsync(
-        int id, int itemId)
+    int id, int itemId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Verify that the checklist item belongs to the current user and course.
-        var item = await _context.ChecklistItems
-            .Include(i => i.StudyTask)
-            .FirstOrDefaultAsync(i =>
-                i.Id == itemId &&
-                i.StudyTask.CourseId == id &&
-                i.StudyTask.UserId == userId);
+        var deleted = await _checklistService.DeleteChecklistItemAsync(
+            itemId,
+            id,
+            userId!);
 
-        if (item == null)
-        {
+        if (!deleted)
             return NotFound();
-        }
-
-        _context.ChecklistItems.Remove(item);
-        await _context.SaveChangesAsync();
 
         return RedirectToPage("./Details", new { id });
     }
+
     // Shared server-side validation for creating and editing tasks.
     private void ValidateTask(string? title, string? description, DateTime? deadline,
         int priority, double hours, string prefix,
