@@ -86,28 +86,22 @@ public class DetailsModel : PageModel
 
         Course = course;
 
-        // Reject empty or whitespace-only course names.
+        // Validate only the course form.
+        ModelState.Clear();
         if (string.IsNullOrWhiteSpace(CourseName))
-        {
-            ModelState.AddModelError(
-                nameof(CourseName),
-                "Du måste ange ett kursnamn."
-            );
-        }
+            ModelState.AddModelError(nameof(CourseName), "Du måste ange ett kursnamn.");
+        else if (CourseName.Trim().Length > 100)
+            ModelState.AddModelError(nameof(CourseName), "Kursnamnet får innehålla högst 100 tecken.");
 
-        // Ignore validation for the task creation form.
-        ModelState.Remove("Title");
-        ModelState.Remove("TaskInput.Title");
-        ModelState.Remove("TaskInput.Description");
-        ModelState.Remove("TaskInput.Deadline");
-        ModelState.Remove("TaskInput.Priority");
-        ModelState.Remove("TaskInput.EstimatedHours");
-        ModelState.Remove("TaskInput");
+        if (string.IsNullOrWhiteSpace(CourseColor) ||
+            !System.Text.RegularExpressions.Regex.IsMatch(CourseColor, "^#[0-9A-Fa-f]{6}$"))
+            ModelState.AddModelError(nameof(CourseColor), "Ogiltig färgkod.");
 
-        // Do not save invalid input.
         if (!ModelState.IsValid)
         {
-
+            Tasks = await _context.StudyTasks.Include(t => t.ChecklistItems)
+                .Where(t => t.CourseId == id && t.UserId == userId)
+                .OrderBy(t => t.Deadline).ToListAsync();
             return Page();
         }
 
@@ -143,7 +137,7 @@ public class DetailsModel : PageModel
         return RedirectToPage("./Index");
     }
 
-    public async Task<IActionResult> OnPostCreateTaskAsync(int id)
+    public async Task<IActionResult> OnPostCreateTaskAsync(int id, List<string> checklistItems)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -155,27 +149,32 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        // Validate only the task form.
-        ModelState.Remove(nameof(CourseName));
-        ModelState.Remove(nameof(CourseColor));
-
-        if (string.IsNullOrWhiteSpace(TaskInput.Title))
-        {
-            ModelState.AddModelError(
-                "TaskInput.Title",
-                "Du måste ange ett namn på uppgiften.");
-        }
+        // Replace automatic binding messages with consistent Swedish validation.
+        bool invalidPriority = ModelState.TryGetValue("TaskInput.Priority", out var p) && p.Errors.Count > 0;
+        bool invalidHours = ModelState.TryGetValue("TaskInput.EstimatedHours", out var e) && e.Errors.Count > 0;
+        bool invalidDate = ModelState.TryGetValue("TaskInput.Deadline", out var d) && d.Errors.Count > 0;
+        ModelState.Clear();
+        ValidateTask(TaskInput.Title, TaskInput.Description, TaskInput.Deadline,
+            TaskInput.Priority, TaskInput.EstimatedHours, "TaskInput.", invalidPriority, invalidHours, invalidDate);
+        if (checklistItems.Any(x => !string.IsNullOrWhiteSpace(x) && x.Trim().Length > 100))
+            ModelState.AddModelError("checklistItems", "Delmoment får innehålla högst 100 tecken.");
 
         if (!ModelState.IsValid)
         {
             Course = course;
+            CourseName = course.Name;
+            CourseColor = course.Color;
+            ViewData["PostedChecklistItems"] = checklistItems.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            Tasks = await _context.StudyTasks.Include(t => t.ChecklistItems)
+                .Where(t => t.CourseId == id && t.UserId == userId)
+                .OrderBy(t => t.Deadline).ToListAsync();
             return Page();
         }
 
         var task = new StudyTask
         {
             Title = TaskInput.Title.Trim(),
-            Description = TaskInput.Description,
+            Description = TaskInput.Description ?? string.Empty,
             Deadline = TaskInput.Deadline,
             Priority = TaskInput.Priority,
             EstimatedHours = TaskInput.EstimatedHours,
@@ -183,6 +182,20 @@ public class DetailsModel : PageModel
             CourseId = course.Id,
             UserId = userId!
         };
+
+        // Add checklist items to the new task.
+        foreach (var title in checklistItems)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                continue;
+            }
+
+            task.ChecklistItems.Add(new ChecklistItem
+            {
+                Title = title.Trim()
+            });
+        }
 
         _context.StudyTasks.Add(task);
         await _context.SaveChangesAsync();
@@ -271,25 +284,26 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        if (string.IsNullOrWhiteSpace(title) ||
-            title.Trim().Length > 100 ||
-            priority < 1 || priority > 3 ||
-            estimatedHours < 0 || estimatedHours > 1000 ||
-            itemIds.Count != itemTitles.Count)
-        {
-            return BadRequest();
-        }
+        bool invalidPriority = ModelState.TryGetValue("priority", out var p) && p.Errors.Count > 0;
+        bool invalidHours = ModelState.TryGetValue("estimatedHours", out var e) && e.Errors.Count > 0;
+        bool invalidDate = ModelState.TryGetValue("deadline", out var d) && d.Errors.Count > 0;
+        ModelState.Clear();
+        ValidateTask(title, description, deadline, priority, estimatedHours, "",
+            invalidPriority, invalidHours, invalidDate);
+
+        if (itemIds.Count != itemTitles.Count ||
+            itemIds.Count != itemIds.Distinct().Count() ||
+            itemIds.Any(itemId => task.ChecklistItems.All(i => i.Id != itemId)))
+            return BadRequest("Ogiltiga checklistuppgifter.");
 
         if (itemTitles.Any(t => string.IsNullOrWhiteSpace(t) || t.Trim().Length > 100) ||
             newItemTitles.Any(t => string.IsNullOrWhiteSpace(t) || t.Trim().Length > 100))
-        {
-            return BadRequest();
-        }
+            ModelState.AddModelError("checklist", "Delmoment måste innehålla 1–100 tecken.");
 
-        if (itemIds.Count != itemIds.Distinct().Count() ||
-            itemIds.Any(itemId => task.ChecklistItems.All(i => i.Id != itemId)))
+        if (!ModelState.IsValid)
         {
-            return BadRequest();
+            // Invalid requests are rejected; client-side validation displays the errors in the form.
+            return BadRequest(string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(x => x.ErrorMessage)));
         }
 
         task.Title = title.Trim();
@@ -386,4 +400,41 @@ public class DetailsModel : PageModel
 
         return RedirectToPage("./Details", new { id });
     }
+    // Shared server-side validation for creating and editing tasks.
+    private void ValidateTask(string? title, string? description, DateTime? deadline,
+        int priority, double hours, string prefix,
+        bool invalidPriority, bool invalidHours, bool invalidDate)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            ModelState.AddModelError(prefix + (prefix == "" ? "title" : "Title"), "Du måste ange ett namn på uppgiften.");
+        else if (title.Trim().Length > 100)
+            ModelState.AddModelError(prefix + (prefix == "" ? "title" : "Title"), "Uppgiftens namn får innehålla högst 100 tecken.");
+
+        if ((description?.Length ?? 0) > 1000)
+            ModelState.AddModelError(prefix + (prefix == "" ? "description" : "Description"), "Beskrivningen får innehålla högst 1000 tecken.");
+
+        if (invalidPriority || priority < 1 || priority > 3)
+            ModelState.AddModelError(prefix + (prefix == "" ? "priority" : "Priority"), "Välj en giltig prioritet.");
+
+        if (invalidHours || !double.IsFinite(hours) || hours < 0 || hours > 1000)
+            ModelState.AddModelError(prefix + (prefix == "" ? "estimatedHours" : "EstimatedHours"), "Arbetsinsatsen måste vara mellan 0 och 1000 timmar.");
+
+        if (invalidDate)
+            ModelState.AddModelError(prefix + (prefix == "" ? "deadline" : "Deadline"), "Ange ett giltigt datum.");
+        else if (deadline.HasValue && deadline.Value.Date < DateTime.Today)
+            ModelState.AddModelError(prefix + (prefix == "" ? "deadline" : "Deadline"), "Deadline får inte ligga bakåt i tiden.");
+    }
+
+    // Delete a task only if it belongs to the signed-in user and selected course.
+    public async Task<IActionResult> OnPostDeleteTaskAsync(int id, int taskId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var task = await _context.StudyTasks.FirstOrDefaultAsync(t =>
+            t.Id == taskId && t.CourseId == id && t.UserId == userId);
+        if (task == null) return NotFound();
+        _context.StudyTasks.Remove(task);
+        await _context.SaveChangesAsync();
+        return RedirectToPage("./Details", new { id });
+    }
+
 }
