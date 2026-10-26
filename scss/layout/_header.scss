@@ -1,0 +1,60 @@
+.header {
+  background-color: var(--color-primary);
+
+  .navbar {
+    background-color: transparent !important;
+    border: none !important;
+    margin-bottom: 0 !important;
+    min-height: 5rem;
+  }
+
+  .navbar-brand {
+    font-family: "Amatic SC", sans-serif;
+    color: var(--color-text);
+    font-weight: 700;
+    font-size: 2.5rem;
+  }
+
+  .navbar-nav {
+    gap: 0.75rem;
+  }
+
+  .navbar-collapse {
+    gap: 0.75rem;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    color: var(--color-text);
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+
+    transition: background-color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--color-paper);
+      color: var(--color-text);
+    }
+  }
+
+  iconify-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .navbar-toggler {
+    border-color: var(--color-text);
+
+    &:focus-visible {
+      outline: 3px solid var(--color-text);
+      outline-offset: 3px;
+    }
+  }
+}

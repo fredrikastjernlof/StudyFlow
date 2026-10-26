@@ -1,0 +1,23 @@
+{
+  "name": "studyflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "sass": "sass --watch scss/main.scss:wwwroot/css/site.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fredrikastjernlof/StudyFlow.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fredrikastjernlof/StudyFlow/issues"
+  },
+  "homepage": "https://github.com/fredrikastjernlof/StudyFlow#readme",
+  "devDependencies": {
+    "sass": "^1.106.1"
+  }
+}

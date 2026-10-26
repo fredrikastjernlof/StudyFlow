@@ -1,0 +1,22 @@
+@use "abstracts/variables" as vars;
+@use "base/typography";
+@use "layout/header";
+@use "layout/footer";
+@use "pages/dashboard";
+
+:root {
+  --color-background: #{vars.$color-background};
+  --color-paper: #{vars.$color-paper};
+  --color-primary: #{vars.$color-primary};
+  --color-text: #{vars.$color-text};
+  --color-danger: #{vars.$color-danger};
+
+  @each $name, $color in vars.$course-colors {
+    --course-#{$name}: #{$color};
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}

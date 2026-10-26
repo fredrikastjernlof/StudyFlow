@@ -6,14 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - StudyFlow</title>
     <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/StudyFlow.styles.css" asp-append-version="true" />
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
+    <header class="header">
+        <nav class="navbar navbar-expand-lg">
             <div class="container">
 
                 <a class="navbar-brand" asp-page="/Index">StudyFlow</a>
@@ -25,60 +28,71 @@
 
                 <div class="collapse navbar-collapse" id="mainNavigation">
 
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav ms-auto">
 
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Index">Dashboard</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Tasks/Index">Mina uppgifter</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-page="/Courses/Index">Mina kurser</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">
-                                    Inställningar
+                                <a class="nav-link" asp-page="/Index">
+                                    <iconify-icon icon="lucide:layout-dashboard" aria-hidden="true"></iconify-icon>
+                                    Dashboard
                                 </a>
                             </li>
-                        }
-                        else
-                        {
+
                             <li class="nav-item">
-                                <a class="nav-link" asp-page="/Index">Hem</a>
-                            </li>
-                        }
+                                <a class="nav-link" asp-page="/Tasks/Index">
+                                    <iconify-icon icon="lucide:list-todo" aria-hidden="true"></iconify-icon>
+                                    Tasks</a>
+                                </li>
 
-                    </ul>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-page="/Courses/Index">
+                                        <iconify-icon icon="lucide:book-open" aria-hidden="true"></iconify-icon>
+                                        Courses</a>
+                                    </li>
 
-                    <partial name="_LoginPartial" />
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                            <iconify-icon icon="lucide:settings" aria-hidden="true"></iconify-icon>
+                                            Settings
+                                        </a>
+                                    </li>
+                                }
+                        else
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-page="/Index">
+                                            <iconify-icon icon="lucide:home" aria-hidden="true"></iconify-icon>
+                                            Home</a>
+                                        </li>
+                                    }
 
+                                </ul>
+
+                                <partial name="_LoginPartial" />
+
+                            </div>
+                        </div>
+                    </nav>
+                </header>
+                <div class="container">
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - StudyFlow - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
+                <footer class="footer">
+                    <div class="container">
+                        <p class="mb-0">&copy; 2026 Fredrika Stjernlöf</p>
+                    </div>
+                </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+                <script src="~/lib/jquery/dist/jquery.min.js"></script>
+                <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+                <script src="~/js/site.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+                @await RenderSectionAsync("Scripts", required: false)
+                <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+            </body>
 
-</html>
+        </html>
