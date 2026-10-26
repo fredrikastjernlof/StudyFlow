@@ -1,7 +1,9 @@
 .footer {
+    position: static;
     background-color: var(--color-primary);
     color: var(--color-text);
     padding: 1.25rem;
     text-align: center;
     font-size: 0.875rem;
+    margin-top: auto;
 }

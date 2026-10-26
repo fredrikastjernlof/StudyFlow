@@ -1,0 +1,11 @@
+@media (max-width: 768px) {
+  .course-dialog {
+    box-sizing: border-box;
+    max-width: calc(100% - 2rem);
+
+    .dialog-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+}

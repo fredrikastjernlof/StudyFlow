@@ -23,17 +23,37 @@ public class IndexModel : PageModel
     // Courses belonging to the currently logged-in user.
     public List<Course> Courses { get; set; } = new();
 
+    // Available pastel colors for courses.
+    public IReadOnlyList<string> AvailableColors { get; } = new[]
+    {
+        "#D6CBFC",
+        "#FFEB92",
+        "#B6E9FF",
+        "#B8FDB8",
+        "#FFD3D3",
+        "#E9D3FF",
+        "#FFC8E7",
+        "#FFDDB8",
+        "#FFE5C7",
+        "#F5F0AE",
+        "#D6F2BA",
+        "#BCEFE0",
+        "#BDE4F5",
+        "#D2DBFF",
+        "#E6D6E9",
+        "#F5D6CB"
+    };
+
     // Validate the course name before creating a course.
     [BindProperty]
-    [Required(ErrorMessage = "Du måste ange ett kursnamn.")]
-    [StringLength(100, ErrorMessage = "Kursnamnet får innehålla högst 100 tecken.")]
+    [Required(ErrorMessage = "You must enter a course name.")]
+    [StringLength(100, ErrorMessage = "The course name cannot exceed 100 characters.")]
     public string CourseName { get; set; } = string.Empty;
 
     // Stores the selected course color.
     [BindProperty]
-    [Required]
-    [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Ogiltig färgkod.")]
-    public string CourseColor { get; set; } = "#B8D8C0";
+    [Required(ErrorMessage = "You must select a course color.")]
+    public string CourseColor { get; set; } = "#D6CBFC";
 
     public async Task OnGetAsync()
     {
@@ -53,7 +73,13 @@ public class IndexModel : PageModel
         // Reject empty or whitespace-only course names.
         if (string.IsNullOrWhiteSpace(CourseName))
         {
-            ModelState.AddModelError(nameof(CourseName), "Du måste ange ett kursnamn.");
+            ModelState.AddModelError(nameof(CourseName), "You must enter a course name.");
+        }
+
+        // Only allow colors from the predefined palette.
+        if (!AvailableColors.Contains(CourseColor, StringComparer.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(nameof(CourseColor), "Please select a color from the palette.");
         }
 
         // Return to the page if validation fails.

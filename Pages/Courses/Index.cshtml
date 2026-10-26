@@ -2,53 +2,90 @@
 @model StudyFlow.Pages.Courses.IndexModel
 
 @{
-    ViewData["Title"] = "Mina kurser";
+    ViewData["Title"] = "My Courses";
 }
 
-<h1>Mina kurser</h1>
+<main class="courses-page">
+    <header class="courses-page-header">
+        <h1>My Courses</h1>
 
-<button type="button" id="openCourseDialog">
-    + Lägg till kurs
-</button>
+        <button type="button" class="add-course-btn" id="openCourseDialog">
+            <span class="add-course-icon">
+                <iconify-icon icon="lucide:book-open"></iconify-icon>
+                <iconify-icon icon="lucide:plus"></iconify-icon>
+            </span>
+            Add new course
+        </button>
+    </header>
 
-<dialog id="courseDialog"
-        aria-labelledby="courseDialogTitle"
+    <section class="bulletin-board" aria-label="My courses">
+        @if (Model.Courses.Count == 0)
+        {
+            <p>You haven't added any courses yet.</p>
+        }
+        else
+        {
+            <ul class="course-grid">
+                @foreach (var course in Model.Courses)
+                {
+                    <partial name="_CourseCard" model="course" />
+                }
+            </ul>
+        }
+    </section>
+</main>
+
+<dialog class="course-dialog" id="courseDialog" aria-labelledby="courseDialogTitle"
         data-validation-error="@(!ViewData.ModelState.IsValid)">
-    <h2 id="courseDialogTitle">Lägg till kurs</h2>
 
-    <form method="post">
-        <div>
-            <label asp-for="CourseName">Kursnamn</label>
-            <input asp-for="CourseName" placeholder="Ange kursnamn" />
-            <span asp-validation-for="CourseName" class="text-danger"></span>
-        </div>
-        <div>
-            <label asp-for="CourseColor">Kursfärg</label>
-            <input asp-for="CourseColor" type="color" />
-            <span asp-validation-for="CourseColor" class="text-danger"></span>
-        </div>
+    <div class="course-dialog-content">
 
-        <button type="submit">Lägg till kurs</button>
-    </form>
+        <h2 id="courseDialogTitle">Add New Course</h2>
 
-    <button type="button" id="closeCourseDialog">
-        Avbryt
-    </button>
+        <form method="post">
+            <div>
+                <label asp-for="CourseName">Course name</label>
+                <input asp-for="CourseName" placeholder="Enter course name" autocomplete="off" />
+                <span asp-validation-for="CourseName" class="text-danger"></span>
+            </div>
+
+            <fieldset class="course-color-picker">
+                <legend>Course color</legend>
+
+                @foreach (var color in Model.AvailableColors)
+                {
+                    <label class="course-color-option" style="--swatch-color: @color">
+
+                        <input type="radio" asp-for="CourseColor" id="course-color-@color.TrimStart('#')" value="@color" />
+
+                        <span class="course-color-swatch">
+                            <iconify-icon icon="lucide:check" aria-hidden="true"></iconify-icon>
+                        </span>
+
+                        <span class="visually-hidden">Course color @color</span>
+                    </label>
+                }
+
+                <span asp-validation-for="CourseColor" class="text-danger"></span>
+            </fieldset>
+
+            <div class="dialog-actions">
+                <button type="button" class="cancel-btn" id="closeCourseDialog">
+                    <iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon>
+                    Cancel
+                </button>
+
+                <button class="add-course-btn" type="submit">
+                    <span class="add-course-icon">
+                        <iconify-icon icon="lucide:book-open"></iconify-icon>
+                        <iconify-icon icon="lucide:plus"></iconify-icon>
+                    </span>
+                    Add course
+                </button>
+            </div>
+        </form>
+
+    </div>
 </dialog>
 
 <script src="~/js/courses.js" asp-append-version="true"></script>
-
-@if (Model.Courses.Count == 0)
-{
-    <p>Du har inte lagt till några kurser ännu.</p>
-}
-else
-{
-    <ul class="course-grid">
-        @foreach (var course in Model.Courses)
-        {
-            @* Render a reusable course card. *@
-            <partial name="_CourseCard" model="course" />
-        }
-    </ul>
-}

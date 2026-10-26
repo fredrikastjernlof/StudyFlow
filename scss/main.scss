@@ -3,6 +3,12 @@
 @use "layout/header";
 @use "layout/footer";
 @use "pages/dashboard";
+@use "components/buttons";
+@use "components/bulletin-board";
+@use "pages/courses";
+@use "components/dialogs";
+@use "layout/responsive";
+@use "components/course-card";
 
 :root {
   --color-background: #{vars.$color-background};
@@ -10,6 +16,13 @@
   --color-primary: #{vars.$color-primary};
   --color-text: #{vars.$color-text};
   --color-danger: #{vars.$color-danger};
+  --color-cork: #{vars.$color-cork};
+  --color-cork-dark: #{vars.$color-cork-dark};
+  --color-cork-light: #{vars.$color-cork-light};
+  --color-wood: #{vars.$color-wood};
+  --color-course-dialog: #{vars.$color-course-dialog};
+  --color-course-accent: #{vars.$color-course-accent};
+  --color-input-background: #{vars.$color-input-background};
 
   @each $name, $color in vars.$course-colors {
     --course-#{$name}: #{$color};
@@ -19,4 +32,16 @@
 body {
   background-color: var(--color-background);
   color: var(--color-text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+body>.container {
+  flex: 1;
+}
+
+main h1 {
+  text-align: center;
 }
