@@ -5,104 +5,177 @@
     ViewData["Title"] = Model.Course.Name;
 }
 
-<main
-    data-course-name-error="@(ViewData.ModelState.ContainsKey("CourseName") && ViewData.ModelState["CourseName"]!.Errors.Count > 0)"
-    data-task-input-error="@(!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("TaskInput.") || k == "checklistItems"))">
-    <a asp-page="./Index">← Tillbaka till mina kurser</a>
+<main class="course-details-page"
+      data-course-name-error="@(ViewData.ModelState.ContainsKey("CourseName") && ViewData.ModelState["CourseName"]!.Errors.Count > 0)"
+      data-task-input-error="@(!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("TaskInput.") || k == "checklistItems"))">
 
-    <header>
-        <h1>@Model.Course.Name</h1>
+    <a asp-page="./Index" class="back-to-courses">
+        <iconify-icon icon="lucide:arrow-left" aria-hidden="true"></iconify-icon>
+        Back to my courses
+    </a>
+
+    <header class="course-details-header">
+        <h1><span class="tape-heading">@Model.Course.Name</span></h1>
+
+        <button type="button" id="openEditCourseDialog" class="add-course-btn edit-course-btn">
+            <iconify-icon icon="lucide:pencil" aria-hidden="true"></iconify-icon>
+            Edit course
+        </button>
     </header>
 
-    <button type="button" id="openEditCourseDialog">
-        Redigera kurs
-    </button>
+    
+    @* Course editing dialog *@
+    <dialog id="editCourseDialog" class="course-dialog" aria-labelledby="editCourseDialogTitle">
 
-    <dialog id="editCourseDialog" aria-labelledby="editCourseDialogTitle">
-        <h2 id="editCourseDialogTitle">Redigera kurs</h2>
+        <div class="course-dialog-content">
+            <div class="edit-course-dialog-header">
+                <h2 id="editCourseDialogTitle">Edit course</h2>
 
-        <form method="post" asp-page-handler="Edit" novalidate>
-            <div>
-                <label asp-for="CourseName">Kursnamn</label>
-                <input asp-for="CourseName" maxlength="100" />
-                <span asp-validation-for="CourseName" class="text-danger"></span>
+                <button type="button" id="openDeleteCourseDialog" class="delete-course-btn">
+                    <iconify-icon icon="lucide:trash-2" aria-hidden="true"></iconify-icon>
+                    Delete course
+                </button>
             </div>
 
-            <div>
-                <label asp-for="CourseColor">Kursfärg</label>
-                <input asp-for="CourseColor" type="color" />
-                <span asp-validation-for="CourseColor" class="text-danger"></span>
-            </div>
+            <form method="post" asp-page-handler="Edit" novalidate>
+                <div>
+                    <label asp-for="CourseName">Course name</label>
+                    <input asp-for="CourseName" placeholder="Enter course name" autocomplete="off" maxlength="100" />
+                    <span asp-validation-for="CourseName" class="text-danger"></span>
+                </div>
 
-            <button type="submit">Spara ändringar</button>
-            <button type="button" id="closeEditCourseDialog">Avbryt</button>
-            <button type="button" id="openDeleteCourseDialog">Ta bort kurs</button>
-        </form>
+                <fieldset class="course-color-picker">
+                    <legend>Course color</legend>
+
+                    @foreach (var color in Model.AvailableColors)
+                    {
+                        <label class="course-color-option" style="--swatch-color: @color">
+                            <input type="radio" asp-for="CourseColor" id="edit-course-color-@color.TrimStart('#')"
+                                   value="@color" />
+
+                            <span class="course-color-swatch">
+                                <iconify-icon icon="lucide:check" aria-hidden="true"></iconify-icon>
+                            </span>
+
+                            <span class="visually-hidden">Course color @color</span>
+                        </label>
+                    }
+
+                    <span asp-validation-for="CourseColor" class="text-danger"></span>
+                </fieldset>
+
+                <div class="dialog-actions">
+                    <button type="button" class="cancel-btn" id="closeEditCourseDialog">
+                        <iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon>
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="add-course-btn">
+                        <span class="add-course-icon">
+                            <iconify-icon icon="lucide:book-open"></iconify-icon>
+                            <iconify-icon icon="lucide:check"></iconify-icon>
+                        </span>
+                        Save changes
+                    </button>
+                </div>
+            </form>
+        </div>
     </dialog>
-
-    <dialog id="deleteCourseDialog" aria-labelledby="deleteCourseDialogTitle"
+    
+    @* Course deletion confirmation *@
+    <dialog id="deleteCourseDialog" class="course-dialog" aria-labelledby="deleteCourseDialogTitle"
             aria-describedby="deleteCourseDialogDescription">
 
-        <h2 id="deleteCourseDialogTitle">Ta bort kurs?</h2>
+        <div class="course-dialog-content">
+            <h2 id="deleteCourseDialogTitle">Delete course?</h2>
 
-        <p id="deleteCourseDialogDescription">
-            Är du säker på att du vill ta bort kursen
-            <strong>@Model.Course.Name</strong>?
-            Alla uppgifter och checklistor som tillhör kursen
-            kommer också att raderas permanent.
-        </p>
+            <p id="deleteCourseDialogDescription">
+                Are you sure you want to delete
+                <strong>@Model.Course.Name</strong>?
+                All tasks and checklists belonging to this course
+                will also be permanently deleted.
+            </p>
 
-        <form method="post" asp-page-handler="Delete">
-            <button type="button" id="closeDeleteCourseDialog">
-                Avbryt
-            </button>
+            <form method="post" asp-page-handler="Delete">
+                <div class="dialog-actions">
+                    <button type="button" class="cancel-btn" id="closeDeleteCourseDialog">
+                        <iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon>
+                        Cancel
+                    </button>
 
-            <button type="submit">
-                Ja, ta bort kurs
-            </button>
-        </form>
+                    <button type="submit" class="delete-course-confirm-btn">
+                        <iconify-icon icon="lucide:trash-2" aria-hidden="true"></iconify-icon>
+                        Delete course
+                    </button>
+                </div>
+            </form>
+        </div>
     </dialog>
 
-    <section aria-labelledby="tasks-heading">
-        <h2 id="tasks-heading">Uppgifter</h2>
 
-        <h3>Today's focus</h3>
+    @* Reuse the dashboard's book layout *@
+    <div class="dashboard-book">
 
-        @if (Model.TodaysFocus != null)
-        {
-            <ul>
-                <partial name="_TaskCard" model="Model.TodaysFocus.Task" />
-            </ul>
-        }
-        else
-        {
-            <p>Inga uppgifter att prioritera just nu.</p>
-        }
+        @* LEFT PAGE: Course tasks *@
+        <section class="dashboard-book-page" aria-labelledby="focus-heading">
 
-        <h3>Övriga uppgifter</h3>
+            <h2 id="focus-heading">
+                @(Model.TodaysFocus?.Task.Status == "InProgress"
+                    ? "Work in progress"
+                    : "Today's focus")
+            </h2>
 
-        @{
-            var otherTasks = Model.Tasks
-                .Where(task => task.Id != Model.TodaysFocus?.Task.Id)
-                .ToList();
-        }
+            @if (Model.TodaysFocus != null)
+            {
+                <ul>
+                    <partial name="_TaskCard" model="Model.TodaysFocus.Task" />
+                </ul>
+            }
+            else
+            {
+                <p>No tasks to focus on right now.</p>
+            }
 
-        @if (otherTasks.Any())
-        {
-            <ul>
-                @foreach (var task in otherTasks)
-                {
-                    @* Render a reusable task card for each task. *@
-                    <partial name="_TaskCard" model="task" />
+            <section aria-labelledby="next-up-heading">
+                <h2 id="next-up-heading">Next up</h2>
+
+                @{
+                    var otherTasks = Model.Tasks
+                        .Where(task =>
+                            task.Status != "Completed" &&
+                            task.Id != Model.TodaysFocus?.Task.Id)
+                        .ToList();
                 }
-            </ul>
-        }
-        else
-        {
-            <p>Inga övriga uppgifter att visa.</p>
-        }
-    </section>
 
+                @if (otherTasks.Any())
+                {
+                    <ul class="next-up-task-list">
+                        @foreach (var task in otherTasks)
+                        {
+                            <partial name="_TaskCardCompact" model="task" />
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No upcoming tasks to show.</p>
+                }
+            </section>
+
+        </section>
+
+        @* RIGHT PAGE: Create a task *@
+        <section class="dashboard-book-page" aria-labelledby="add-task-heading">
+
+            <h2 id="add-task-heading">Add new task</h2>
+
+            <partial name="_CreateTaskForm" model="Model.TaskInput" />
+
+        </section>
+
+    </div>
+
+    @* Keep all existing task dialogs *@
     @foreach (var task in Model.Tasks)
     {
         <partial name="_TaskDetailsDialog" model="task" />
@@ -115,15 +188,9 @@
 
     @foreach (var task in Model.Tasks)
     {
-        @* Render the task editing dialog. *@
         <partial name="_EditTaskDialog" model="task" />
     }
 
-    <section aria-labelledby="add-task-heading">
-        <h2 id="add-task-heading">Lägg till uppgift</h2>
-
-        <partial name="_CreateTaskForm" model="Model.TaskInput" />
-    </section>
 </main>
 
 @section Scripts {

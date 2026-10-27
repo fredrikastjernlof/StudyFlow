@@ -1,4 +1,5 @@
-.dashboard {
+.dashboard,
+.course-details-page {
     padding: 2rem 0 4rem;
 
     >h1 {
@@ -12,11 +13,9 @@
         isolation: isolate;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-
         width: 100%;
         max-width: 1200px;
         margin: 0 auto;
-
         background-color: var(--color-paper);
         border-radius: 12px 17px 14px 9px;
 
@@ -70,6 +69,26 @@
             box-shadow:
                 inset 22px 0 32px -16px rgb(55 38 35 / 55%),
                 inset -8px 0 15px -12px rgb(55 38 35 / 12%);
+        }
+    }
+
+    // Center headings and the main task card on each book page.
+    .dashboard-book-page {
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+        }
+
+        >ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .task-card:not(.task-card-compact) {
+            margin-left: auto;
+            margin-right: auto;
         }
     }
 

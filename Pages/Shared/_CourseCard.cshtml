@@ -6,10 +6,23 @@
 
 @* Reusable course card linking to the course details page. *@
 <li class="course-grid-item">
-    <a asp-page="/Courses/Details"
-       asp-route-id="@course.Id"
-       class="course-card"
+    <a asp-page="/Courses/Details" asp-route-id="@course.Id" class="course-card"
        style="background-color: @course.Color;">
+
         <span>@course.Name</span>
+
+        @* Hand-drawn arrow with overlapping pen strokes. *@
+        <svg class="course-card-arrow" viewBox="0 0 110 45" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+
+                <path d="M9 24 C35 29, 67 20, 99 23" stroke-width="2.5" />
+
+                <path d="M13 27 C42 30, 74 21, 101 25" stroke-width="1.1" opacity="0.65" />
+
+                <path d="M88 12 Q95 18, 101 25 Q94 29, 87 35" stroke-width="2.5" />
+
+                <path d="M86 14 Q94 21, 99 24 L89 33" stroke-width="1.2" opacity="0.65" />
+            </g>
+        </svg>
     </a>
 </li>

@@ -1,28 +1,35 @@
 body {
-  font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 h1,
 h2,
-h3 {
-  font-family: "Amatic SC", sans-serif;
-  font-weight: 700;
+h3,
+h4 {
+    font-family: "Amatic SC", sans-serif;
+    font-weight: 700;
 }
 
 h1 {
-  font-size: 3.5rem;
+    font-size: 3.5rem;
 }
 
-h2 {
-  font-size: 2.75rem;
-}
+// Tape for page headings.
+.tape-heading {
+    padding: 0.04em 0.35em;
+    line-height: 1.65;
+    background-color: rgb(243 232 206 / 88%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    border-radius: 2px 6px 3px 5px;
 
-h3 {
-  font-size: 2rem;
+    box-shadow:
+        1px 2px 3px rgb(55 38 35 / 12%),
+        inset 0 1px 1px rgb(255 255 255 / 35%);
 }
 
 .header .navbar-brand {
-  font-family: "Amatic SC", sans-serif;
-  font-size: 2.5rem;
-  font-weight: 700;
+    font-family: "Amatic SC", sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
 }

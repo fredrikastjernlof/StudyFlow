@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (empty) {
                 updateValidationSummary(form, {
-                    checklist: "Fyll i delmomentet innan du lägger till ett nytt."
+                    checklist: "Fill in the checklist item before adding another."
                 });
                 empty.focus();
                 return;
@@ -96,9 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
             row.className = "edit-checklist-row";
             row.innerHTML = `
                 <input type="text" name="newItemTitles"
-                       maxlength="100" aria-label="Nytt delmoment" />
-                <button type="button" class="remove-checklist-row">Ta bort</button>
-            `;
+                maxlength="100" aria-label="New checklist item" />
+                <button type="button" class="remove-checklist-row">Remove</button>
+`;
 
             container.appendChild(row);
         });

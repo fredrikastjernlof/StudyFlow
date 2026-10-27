@@ -1,0 +1,225 @@
+.task-card {
+    position: relative;
+    padding: 1.5rem;
+    list-style: none;
+    transform: none;
+
+    box-shadow:
+        3px 5px 8px rgb(55 38 35 / 20%),
+        7px 10px 16px rgb(55 38 35 / 12%);
+
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+    }
+
+    // Clickable task information
+    button.task-card-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+
+        margin: -1.5rem -1.5rem 0;
+        padding: 1.5rem;
+        width: calc(100% + 3rem);
+        box-sizing: border-box;
+
+        border: none;
+        background: transparent;
+        box-shadow: none;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        .task-card-title {
+            font-weight: 700;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-text);
+            outline-offset: 4px;
+        }
+    }
+
+    // Checklist section
+    .task-card-checklist {
+        margin-top: -0.5rem;
+
+        // Hand-drawn divider
+        .task-card-divider {
+            display: block;
+            width: 100%;
+            height: 14px;
+            margin-bottom: 0.5rem;
+        }
+
+        // Collapsible checklist
+        .task-checklist-details {
+            summary {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.5rem;
+                cursor: pointer;
+                list-style: none;
+
+                &::-webkit-details-marker {
+                    display: none;
+                }
+
+                h4 {
+                    margin: 0;
+                }
+
+                iconify-icon {
+                    font-size: 1.25rem;
+                    transition: transform 0.2s ease;
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--color-text);
+                    outline-offset: 4px;
+                }
+            }
+
+            &[open] summary iconify-icon {
+                transform: rotate(180deg);
+            }
+        }
+
+        // Scrollable checklist items
+        .task-checklist-scroll {
+            max-height: 150px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 0.75rem 0.5rem 0 0;
+
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            li {
+                margin-bottom: 0.4rem;
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                cursor: pointer;
+            }
+
+            // Round checkboxes
+            .checklist-checkbox {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                flex-shrink: 0;
+                margin: 0;
+                border: 1.5px solid var(--color-text);
+                border-radius: 50%;
+                background: transparent;
+                cursor: pointer;
+
+                &:checked {
+                    background-color: var(--color-primary);
+                    border-color: var(--color-text);
+                    box-shadow: inset 0 0 0 3px var(--color-paper);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--color-text);
+                    outline-offset: 3px;
+                }
+            }
+        }
+
+        .checklist-count {
+            margin-top: 0.75rem;
+        }
+
+        .checklist-progress {
+            display: block;
+            width: 100%;
+            height: 12px;
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            border-radius: 999px;
+            overflow: hidden;
+            background-color: #e5e5e5;
+
+            &::-webkit-progress-bar {
+                background-color: #e5e5e5;
+                border-radius: 999px;
+            }
+
+            &::-webkit-progress-value {
+                background-color: var(--color-primary);
+                border-radius: 999px;
+            }
+
+            &::-moz-progress-bar {
+                background-color: var(--color-primary);
+                border-radius: 999px;
+            }
+        }
+    }
+}
+
+/* Cards for Next up */
+.task-card-compact {
+    padding: 0;
+    min-height: 110px;
+
+    button.task-card-header {
+        margin: 0;
+        padding: 1rem 1.25rem;
+        width: 100%;
+        gap: 0.5rem;
+        min-height: 110px;
+
+        .task-card-title {
+            font-size: 1.5rem;
+            line-height: 1.1;
+        }
+    }
+
+    .task-card-description {
+        margin: 0;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow: hidden;
+    }
+
+    .task-card-deadline {
+        margin-top: auto;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+}
+
+// Two-column layout for Next up cards
+.next-up-task-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,201 @@
+.create-task-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    min-width: 0;
+
+    // Labels and form fields
+    .task-form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        min-width: 0;
+
+        label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+    }
+
+    // Shared styling for text fields, dropdowns and date inputs
+    input,
+    textarea,
+    select {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 0.8rem 1rem;
+        border: none;
+        border: 1px solid #47805A;
+        border-bottom: 4px solid #47805A;
+        border-radius: 10px 10px 7px 7px;
+        background-color: var(--color-task-input);
+        color: var(--color-text);
+        font: inherit;
+        font-size: 0.95rem;
+
+        box-shadow: 0 3px 6px rgb(55 38 35 / 10%);
+
+        &:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 3px;
+        }
+
+        &::placeholder {
+            color: var(--color-text);
+            opacity: 0.55;
+        }
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 110px;
+    }
+
+    // Priority and estimated hours side by side
+    .task-form-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    // Checklist section
+    .create-task-checklist {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--color-primary);
+
+        h3 {
+            margin: 0;
+        }
+
+        >label {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .new-checklist-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .new-checklist-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 0;
+
+            input {
+                flex: 1;
+            }
+        }
+
+        // Button for removing a checklist item
+        .remove-new-checklist-item {
+            flex-shrink: 0;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--color-danger);
+            border-radius: 20px;
+            background-color: var(--color-paper);
+            color: var(--color-danger);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        // Add another checklist item
+        .add-new-checklist-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
+            border: 2px solid #47805A;
+            border-radius: 30px;
+            background-color: var(--color-task-input);
+            color: var(--color-text);
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+
+            iconify-icon {
+                font-size: 1.1rem;
+            }
+
+            &:hover {
+                background-color: var(--color-input-background);
+            }
+        }
+    }
+
+    // Main submit button
+    .create-task-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.9rem 1.5rem;
+        border: 2px solid #47805A;
+        border-radius: 30px;
+        background-color: var(--color-primary);
+        color: var(--color-text);
+        font: inherit;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+
+        iconify-icon {
+            font-size: 1.2rem;
+        }
+
+        &:hover {
+            filter: brightness(0.96);
+        }
+    }
+
+    // Validation messages
+    .validation-summary,
+    [data-error-for="checklistItems"] {
+        color: var(--color-danger);
+        font-size: 0.9rem;
+    }
+
+    .validation-summary[hidden] {
+        display: none;
+    }
+
+    // Stack all form fields on mobile
+    @media (max-width: 768px) {
+        gap: 1rem;
+
+        .task-form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .create-task-checklist {
+            padding-top: 1.25rem;
+        }
+    }
+}
+
+
+// Highlight invalid fields until their values are corrected.
+input.is-invalid,
+textarea.is-invalid,
+select.is-invalid {
+    border: 2px solid var(--color-danger);
+    border-bottom: 4px solid var(--color-danger);
+
+    &:focus-visible {
+        outline-color: var(--color-danger);
+    }
+}

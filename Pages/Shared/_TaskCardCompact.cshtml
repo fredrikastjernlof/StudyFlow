@@ -1,0 +1,29 @@
+
+@* Compact task card used in the Next up section. *@
+@model StudyFlow.Models.StudyTask
+
+@{
+    var task = Model;
+    var taskColor = task.Course?.Color ?? "#C8E8D5";
+}
+
+<li class="task-card task-card-compact" style="background-color: @taskColor;">
+    <button type="button"
+            class="task-details-button task-card-header"
+            data-task-id="@task.Id">
+
+        <h3 class="task-card-title">@task.Title</h3>
+
+        @if (!string.IsNullOrWhiteSpace(task.Description))
+        {
+            <p class="task-card-description">@task.Description</p>
+        }
+
+        @if (task.Deadline.HasValue)
+        {
+            <span class="task-card-deadline">
+                Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")
+            </span>
+        }
+    </button>
+</li>

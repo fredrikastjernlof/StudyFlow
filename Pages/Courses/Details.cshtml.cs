@@ -33,6 +33,9 @@ public class DetailsModel : PageModel
 
     public Course Course { get; set; } = null!;
 
+    // Available pastel colors for courses.
+    public IReadOnlyList<string> AvailableColors => Course.AvailableColors;
+
     // Fields used when editing a course.
     [BindProperty]
     [Required(ErrorMessage = "Du måste ange ett kursnamn.")]
@@ -93,7 +96,7 @@ public class DetailsModel : PageModel
 
         Course = course;
 
-        // Validate only the course form.
+        // Validate the submitted course details.
         ModelState.Clear();
         if (string.IsNullOrWhiteSpace(CourseName))
             ModelState.AddModelError(nameof(CourseName), "Du måste ange ett kursnamn.");
@@ -154,7 +157,7 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        // Replace automatic binding messages with consistent Swedish validation.
+        // Validate task input before creating a new task.
         bool invalidPriority = ModelState.TryGetValue("TaskInput.Priority", out var p) && p.Errors.Count > 0;
         bool invalidHours = ModelState.TryGetValue("TaskInput.EstimatedHours", out var e) && e.Errors.Count > 0;
         bool invalidDate = ModelState.TryGetValue("TaskInput.Deadline", out var d) && d.Errors.Count > 0;
@@ -162,7 +165,7 @@ public class DetailsModel : PageModel
         ValidateTask(TaskInput.Title, TaskInput.Description, TaskInput.Deadline,
             TaskInput.Priority, TaskInput.EstimatedHours, "TaskInput.", invalidPriority, invalidHours, invalidDate);
         if (checklistItems.Any(x => !string.IsNullOrWhiteSpace(x) && x.Trim().Length > 100))
-            ModelState.AddModelError("checklistItems", "Delmoment får innehålla högst 100 tecken.");
+            ModelState.AddModelError("checklistItems", "Checklist items must not exceed 100 characters.");
 
         if (!ModelState.IsValid)
         {
@@ -259,15 +262,15 @@ public class DetailsModel : PageModel
         if (itemIds.Count != itemTitles.Count ||
             itemIds.Count != itemIds.Distinct().Count() ||
             itemIds.Any(itemId => task.ChecklistItems.All(i => i.Id != itemId)))
-            return BadRequest("Ogiltiga checklistuppgifter.");
+            return BadRequest("Invalid checklist data.");
 
         if (itemTitles.Any(t => string.IsNullOrWhiteSpace(t) || t.Trim().Length > 100) ||
             newItemTitles.Any(t => string.IsNullOrWhiteSpace(t) || t.Trim().Length > 100))
-            ModelState.AddModelError("checklist", "Delmoment måste innehålla 1–100 tecken.");
+            ModelState.AddModelError("checklist", "Checklist items must contain 1–100 characters.");
 
         if (!ModelState.IsValid)
         {
-            // Invalid requests are rejected; client-side validation displays the errors in the form.
+            // Reject invalid task updates.
             return BadRequest(string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(x => x.ErrorMessage)));
         }
 
@@ -287,7 +290,7 @@ public class DetailsModel : PageModel
 
         if (!updated)
         {
-            return BadRequest("Uppgiften kunde inte uppdateras.");
+            return BadRequest("The task could not be updated.");
         }
 
         return RedirectToPage("./Details", new { id });
@@ -332,29 +335,32 @@ public class DetailsModel : PageModel
     }
 
     // Shared server-side validation for creating and editing tasks.
+
+    // Shared server-side validation for creating and editing tasks.
     private void ValidateTask(string? title, string? description, DateTime? deadline,
         int priority, double hours, string prefix,
         bool invalidPriority, bool invalidHours, bool invalidDate)
     {
         if (string.IsNullOrWhiteSpace(title))
-            ModelState.AddModelError(prefix + (prefix == "" ? "title" : "Title"), "Du måste ange ett namn på uppgiften.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "title" : "Title"), "Please enter a task name.");
         else if (title.Trim().Length > 100)
-            ModelState.AddModelError(prefix + (prefix == "" ? "title" : "Title"), "Uppgiftens namn får innehålla högst 100 tecken.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "title" : "Title"), "Task name must not exceed 100 characters.");
 
         if ((description?.Length ?? 0) > 1000)
-            ModelState.AddModelError(prefix + (prefix == "" ? "description" : "Description"), "Beskrivningen får innehålla högst 1000 tecken.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "description" : "Description"), "Description must not exceed 1000 characters.");
 
         if (invalidPriority || priority < 1 || priority > 3)
-            ModelState.AddModelError(prefix + (prefix == "" ? "priority" : "Priority"), "Välj en giltig prioritet.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "priority" : "Priority"), "Please select a valid priority.");
 
         if (invalidHours || !double.IsFinite(hours) || hours < 0 || hours > 1000)
-            ModelState.AddModelError(prefix + (prefix == "" ? "estimatedHours" : "EstimatedHours"), "Arbetsinsatsen måste vara mellan 0 och 1000 timmar.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "estimatedHours" : "EstimatedHours"), "Estimated hours must be between 0 and 1000.");
 
         if (invalidDate)
-            ModelState.AddModelError(prefix + (prefix == "" ? "deadline" : "Deadline"), "Ange ett giltigt datum.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "deadline" : "Deadline"), "Please enter a valid date.");
         else if (deadline.HasValue && deadline.Value.Date < DateTime.Today)
-            ModelState.AddModelError(prefix + (prefix == "" ? "deadline" : "Deadline"), "Deadline får inte ligga bakåt i tiden.");
+            ModelState.AddModelError(prefix + (prefix == "" ? "deadline" : "Deadline"), "Deadline cannot be in the past.");
     }
+
 
     // Delete a task only if it belongs to the signed-in user and selected course.
     public async Task<IActionResult> OnPostDeleteTaskAsync(int id, int taskId)

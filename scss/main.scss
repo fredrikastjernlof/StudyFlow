@@ -7,8 +7,12 @@
 @use "components/bulletin-board";
 @use "pages/courses";
 @use "components/dialogs";
+@use "components/course-dialogs";
+@use "components/task-dialogs";
 @use "layout/responsive";
 @use "components/course-card";
+@use "pages/tasks";
+@use "components/create-task-form";
 
 :root {
   --color-background: #{vars.$color-background};
@@ -23,6 +27,7 @@
   --color-course-dialog: #{vars.$color-course-dialog};
   --color-course-accent: #{vars.$color-course-accent};
   --color-input-background: #{vars.$color-input-background};
+  --color-task-input: #{vars.$color-task-input};
 
   @each $name, $color in vars.$course-colors {
     --course-#{$name}: #{$color};

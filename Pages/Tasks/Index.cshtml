@@ -1,45 +1,44 @@
+
 @page
 @model StudyFlow.Pages.Tasks.IndexModel
 
 @{
-    ViewData["Title"] = "Mina uppgifter";
+    ViewData["Title"] = "My tasks";
 
     var inProgress = Model.Tasks
-    .Where(task => task.Status == "InProgress"
-        && task.Id != Model.TodaysFocus?.Task.Id)
-    .ToList();
+        .Where(task => task.Status == "InProgress"
+            && task.Id != Model.TodaysFocus?.Task.Id)
+        .ToList();
 
     var comingUp = Model.Tasks
-    .Where(task => task.Status == "NotStarted"
-        && task.Id != Model.TodaysFocus?.Task.Id)
-    .ToList();
+        .Where(task => task.Status == "NotStarted"
+            && task.Id != Model.TodaysFocus?.Task.Id)
+        .ToList();
 
     var completed = Model.Tasks
         .Where(t => t.Status == "Completed")
         .ToList();
 }
 
-<h1>Mina uppgifter</h1>
-
+<h1><span class="tape-heading">My tasks</span></h1>
 
 <button type="button" id="open-create-task-dialog">
-    + Lägg till uppgift
+    + Add task
 </button>
 
 <dialog id="create-task-dialog" aria-labelledby="create-task-heading"
         data-open-on-load="@Model.OpenCreateDialog.ToString().ToLowerInvariant()">
 
     <div class="create-task-dialog-header">
-        <h2 id="create-task-heading">Lägg till uppgift</h2>
+        <h2 id="create-task-heading">Add task</h2>
 
         <button type="button" id="close-create-task-dialog">
-            Stäng
+            Close
         </button>
     </div>
 
     <partial name="_CreateTaskForm" model="Model.TaskInput" view-data="ViewData" />
 </dialog>
-
 
 <div class="tasks-book">
 
@@ -54,7 +53,7 @@
         }
         else
         {
-            <p>Inga uppgifter att prioritera just nu.</p>
+            <p>No tasks to prioritize right now.</p>
         }
 
         <h2>Work in progress</h2>
@@ -70,7 +69,7 @@
         }
         else
         {
-            <p>Inga pågående uppgifter.</p>
+            <p>No tasks in progress.</p>
         }
     </section>
 
@@ -88,7 +87,7 @@
         }
         else
         {
-            <p>Inga kommande uppgifter.</p>
+            <p>No upcoming tasks.</p>
         }
 
         <h2>Completed</h2>
@@ -104,7 +103,7 @@
         }
         else
         {
-            <p>Inga slutförda uppgifter.</p>
+            <p>No completed tasks.</p>
         }
     </section>
 
@@ -116,7 +115,6 @@
     <partial name="_EditTaskDialog" model="task" />
     <partial name="_DeleteTaskDialog" model="task" />
 }
-
 
 @section Scripts {
     <script src="~/js/task-form-validation.js" asp-append-version="true"></script>

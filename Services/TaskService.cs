@@ -32,6 +32,7 @@ public class TaskService
     public async Task<List<StudyTask>> GetCourseTasksAsync(int courseId, string userId)
     {
         return await _context.StudyTasks
+            .Include(t => t.Course)
             .Include(t => t.ChecklistItems)
             .Where(t => t.CourseId == courseId && t.UserId == userId)
             .OrderBy(t => t.Deadline)

@@ -1,4 +1,3 @@
-
 @model StudyFlow.ViewModels.StudyTaskInputModel
 
 @{
@@ -9,12 +8,13 @@
 
 <form method="post" asp-page-handler="CreateTask" class="create-task-form" novalidate>
 
+    @* Display server-side validation errors. *@
     @if (!ViewData.ModelState.IsValid &&
         ViewData.ModelState.Keys.Any(k =>
             k.StartsWith("TaskInput.") || k == "checklistItems" || k == "CourseId"))
     {
         <div class="validation-summary text-danger" role="alert">
-            <strong>Kontrollera följande:</strong>
+            <strong>Please check the following:</strong>
             <ul>
                 @foreach (var error in ViewData.ModelState
                     .Where(kvp => kvp.Key.StartsWith("TaskInput.") ||
@@ -31,16 +31,17 @@
     }
     else
     {
-        <div class="validation-summary text-danger"
-             role="alert" aria-live="polite" hidden></div>
+        <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
     }
 
+    @* Course selection is only displayed when creating a task outside a course. *@
     @if (showCourseSelect)
     {
-        <div>
-            <label for="CourseId">Kurs (frivilligt)</label>
+        <div class="task-form-field">
+            <label for="CourseId">Course (optional)</label>
             <select id="CourseId" name="CourseId">
-                <option value="">Ingen kurs</option>
+                <option value="">No course</option>
+
                 @if (courses != null)
                 {
                     @foreach (var course in courses)
@@ -59,59 +60,61 @@
         </div>
     }
 
-    <div>
-        <label for="TaskInput_Title">Uppgiftens namn</label>
-        <input id="TaskInput_Title" name="TaskInput.Title"
-               value="@Model.Title" maxlength="100"
-               placeholder="Ange uppgiftens namn" />
+    <div class="task-form-field">
+        <label for="TaskInput_Title">Task name</label>
+        <input id="TaskInput_Title" name="TaskInput.Title" value="@Model.Title" maxlength="100"
+               placeholder="Enter task name" autocomplete="off" />
     </div>
 
-    <div>
-        <label for="TaskInput_Description">Beskrivning</label>
-        <textarea id="TaskInput_Description" name="TaskInput.Description"
-                  rows="4" maxlength="1000">@Model.Description</textarea>
+    <div class="task-form-field">
+        <label for="TaskInput_Description">Description</label>
+        <textarea id="TaskInput_Description" name="TaskInput.Description" rows="4" maxlength="1000"
+                  placeholder="Describe your task...">@Model.Description</textarea>
     </div>
 
-    <div>
-        <label for="TaskInput_Priority">Prioritet</label>
-        <select id="TaskInput_Priority" name="TaskInput.Priority">
-            @foreach (var option in new[] { (1, "Låg"), (2, "Medel"), (3, "Hög") })
-            {
-                if (Model.Priority == option.Item1)
+    @* Priority and estimated hours share a row on larger screens. *@
+    <div class="task-form-row">
+        <div class="task-form-field">
+            <label for="TaskInput_Priority">Priority</label>
+            <select id="TaskInput_Priority" name="TaskInput.Priority">
+                @foreach (var option in new[] { (1, "Low"), (2, "Medium"), (3, "High") })
                 {
-                    <option value="@option.Item1" selected>@option.Item2</option>
+                    if (Model.Priority == option.Item1)
+                    {
+                        <option value="@option.Item1" selected>@option.Item2</option>
+                    }
+                    else
+                    {
+                        <option value="@option.Item1">@option.Item2</option>
+                    }
                 }
-                else
-                {
-                    <option value="@option.Item1">@option.Item2</option>
-                }
-            }
-        </select>
+            </select>
+        </div>
+
+        <div class="task-form-field">
+            <label for="TaskInput_EstimatedHours">Estimated hours</label>
+            <input id="TaskInput_EstimatedHours" name="TaskInput.EstimatedHours" type="number" min="0" max="1000"
+                   step="0.5" value="@Model.EstimatedHours.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+        </div>
     </div>
 
-    <div>
-        <label for="TaskInput_EstimatedHours">Uppskattad arbetsinsats (timmar)</label>
-        <input id="TaskInput_EstimatedHours" name="TaskInput.EstimatedHours"
-               type="number" min="0" max="1000" step="0.5"
-               value="@Model.EstimatedHours.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
-    </div>
-
-    <div>
+    <div class="task-form-field">
         <label for="TaskInput_Deadline">Deadline</label>
-        <input id="TaskInput_Deadline" name="TaskInput.Deadline"
-               type="date" value="@Model.Deadline?.ToString("yyyy-MM-dd")" />
+        <input id="TaskInput_Deadline" name="TaskInput.Deadline" type="date"
+               value="@Model.Deadline?.ToString("yyyy-MM-dd")" />
     </div>
 
+    @* Optional checklist items can be added or removed dynamically. *@
     <section class="create-task-checklist">
-        <h3>Checklista</h3>
 
-        <label for="newChecklistItem">Lägg till delmoment (frivilligt)</label>
+        <h3>My checklist</h3>
+
+        <label for="newChecklistItem">Add checklist items (optional)</label>
 
         <div class="new-checklist-items">
             <div class="new-checklist-row">
-                <input type="text" id="newChecklistItem"
-                       name="checklistItems" placeholder="Delmoment 1"
-                       maxlength="100" />
+                <input type="text" id="newChecklistItem" name="checklistItems" placeholder="Checklist item 1"
+                       maxlength="100" autocomplete="off" />
             </div>
 
             @if (ViewData["PostedChecklistItems"] is List<string> postedItems)
@@ -119,10 +122,10 @@
                 @foreach (var postedItem in postedItems)
                 {
                     <div class="new-checklist-row">
-                        <input type="text" name="checklistItems"
-                               value="@postedItem" maxlength="100" />
+                        <input type="text" name="checklistItems" value="@postedItem" maxlength="100" />
+
                         <button type="button" class="remove-new-checklist-item">
-                            Ta bort
+                            Remove
                         </button>
                     </div>
                 }
@@ -132,9 +135,13 @@
         <p data-error-for="checklistItems" class="text-danger" role="alert"></p>
 
         <button type="button" class="add-new-checklist-item">
-            + Lägg till delmoment
+            <iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>
+            Add checklist item
         </button>
     </section>
 
-    <button type="submit">Skapa uppgift</button>
+    <button type="submit" class="create-task-submit">
+        <iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>
+        Add task
+    </button>
 </form>

@@ -36,12 +36,10 @@
             transform: rotate(-0.4deg);
             opacity: 0.9;
 
-            clip-path: polygon(
-                0 0, 20% 1%, 40% 0, 60% 1%, 80% 0, 100% 0,
-                99% 25%, 100% 50%, 99% 75%, 100% 100%,
-                75% 99%, 50% 100%, 25% 99%, 0 100%,
-                1% 75%, 0 50%, 1% 25%
-            );
+            clip-path: polygon(0 0, 20% 1%, 40% 0, 60% 1%, 80% 0, 100% 0,
+                    99% 25%, 100% 50%, 99% 75%, 100% 100%,
+                    75% 99%, 50% 100%, 25% 99%, 0 100%,
+                    1% 75%, 0 50%, 1% 25%);
         }
 
         &::after {
@@ -64,7 +62,7 @@
         gap: 1.5rem;
     }
 
-    form > div {
+    form>div {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
@@ -175,7 +173,7 @@
                 }
             }
 
-            input:checked + .course-color-swatch {
+            input:checked+.course-color-swatch {
                 border-color: var(--color-text);
 
                 iconify-icon {
@@ -183,10 +181,11 @@
                 }
             }
 
-            input:focus-visible + .course-color-swatch {
+            input:focus-visible+.course-color-swatch {
                 outline: 2px solid var(--color-text);
                 outline-offset: 3px;
             }
         }
     }
 }
+

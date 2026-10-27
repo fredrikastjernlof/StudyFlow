@@ -20,19 +20,27 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 100%;
         min-height: 200px;
         padding: 2rem 1.5rem;
-
         color: var(--color-text);
         text-align: center;
         text-decoration: none;
         overflow-wrap: anywhere;
-
         box-shadow:
             3px 5px 8px rgb(55 38 35 / 30%),
             8px 12px 18px rgb(55 38 35 / 20%);
+
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .course-card-arrow {
+            width: 85px;
+            height: auto;
+            color: var(--color-text);
+            transform: rotate(-5deg);
+            flex-shrink: 0;
+        }
 
         // Pushpin
         &::before {
@@ -41,11 +49,9 @@
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-
             width: 15px;
             height: 15px;
             border-radius: 50%;
-
             background: radial-gradient(circle at 35% 30%,
                     #ffb6b6,
                     #d94b65 65%,
@@ -65,6 +71,18 @@
             outline: 3px solid var(--color-text);
             outline-offset: 5px;
         }
+    }
+
+    &:nth-child(2n) .course-card-arrow {
+        transform: rotate(3deg);
+    }
+
+    &:nth-child(3n) .course-card-arrow {
+        transform: rotate(-8deg);
+    }
+
+    &:nth-child(5n) .course-card-arrow {
+        transform: rotate(1deg);
     }
 }
 

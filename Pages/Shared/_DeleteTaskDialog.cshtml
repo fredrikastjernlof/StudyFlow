@@ -5,15 +5,31 @@
 }
 
 @* Confirm permanent deletion of a task and its checklist items. *@
-<dialog id="deleteTaskDialog-@task.Id" aria-labelledby="deleteTaskHeading-@task.Id">
-    <h2 id="deleteTaskHeading-@task.Id">Ta bort uppgift?</h2>
+<dialog id="deleteTaskDialog-@task.Id" class="course-dialog delete-task-dialog"
+        style="--task-dialog-color: @(task.Course?.Color ?? "#D6CBFC")" aria-labelledby="deleteTaskHeading-@task.Id">
 
-    <p>Är du säker på att du vill ta bort <strong>@task.Title</strong> och dess delmoment permanent?</p>
+    <div class="course-dialog-content delete-task-dialog-content">
 
-    <form method="post" asp-page-handler="DeleteTask">
-        <input type="hidden" name="taskId" value="@task.Id" />
+        <h2 id="deleteTaskHeading-@task.Id">Delete task?</h2>
 
-        <button type="button" class="cancel-delete-task">Avbryt</button>
-        <button type="submit">Ja, ta bort uppgift</button>
-    </form>
+        <p>
+            Are you sure you want to permanently delete
+            <strong>@task.Title</strong> and all its checklist items?
+        </p>
+
+        <form method="post" asp-page-handler="DeleteTask" class="delete-task-form">
+
+            <input type="hidden" name="taskId" value="@task.Id" />
+
+            <div class="delete-task-actions">
+                <button type="button" class="cancel-delete-task">
+                    Cancel
+                </button>
+
+                <button type="submit" class="confirm-delete-task">
+                    Delete task
+                </button>
+            </div>
+        </form>
+    </div>
 </dialog>

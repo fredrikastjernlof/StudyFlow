@@ -24,25 +24,8 @@ public class IndexModel : PageModel
     public List<Course> Courses { get; set; } = new();
 
     // Available pastel colors for courses.
-    public IReadOnlyList<string> AvailableColors { get; } = new[]
-    {
-        "#D6CBFC",
-        "#FFEB92",
-        "#B6E9FF",
-        "#B8FDB8",
-        "#FFD3D3",
-        "#E9D3FF",
-        "#FFC8E7",
-        "#FFDDB8",
-        "#FFE5C7",
-        "#F5F0AE",
-        "#D6F2BA",
-        "#BCEFE0",
-        "#BDE4F5",
-        "#D2DBFF",
-        "#E6D6E9",
-        "#F5D6CB"
-    };
+    // Available pastel colors for courses.
+    public IReadOnlyList<string> AvailableColors => Course.AvailableColors;
 
     // Validate the course name before creating a course.
     [BindProperty]

@@ -1,62 +1,85 @@
+
 @* Each task card receives a StudyTask object. *@
 @model StudyFlow.Models.StudyTask
 
 @{
     var task = Model;
+    var taskColor = task.Course?.Color ?? "#C8E8D5";
 }
 
-@* Display the task title, course, priority and deadline. *@
-<li>
-    <h3>
-        <button type="button" class="task-details-button" data-task-id="@task.Id">
-            @task.Title
-        </button>
-    </h3>
+<li class="task-card" style="background-color: @taskColor;">
 
-    @if (task.Course != null)
-    {
-        <p class="task-course-name">@task.Course.Name</p>
-    }
-    else
-    {
-        <p class="task-course-name">Fristående uppgift</p>
-    }
+    @* The entire upper section opens the task details dialog. *@
+    <button type="button" class="task-details-button task-card-header" data-task-id="@task.Id">
 
-    <p>Prioritet:
-        @(task.Priority == 3 ? "Hög" :
-          task.Priority == 2 ? "Medel" : "Låg")
-    </p>
+        <h3 class="task-card-title">@task.Title</h3>
 
-    @if (task.Deadline.HasValue)
-    {
-        <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
-    }
+        @if (task.Course != null)
+        {
+            <span class="task-course-name">@task.Course.Name</span>
+        }
+        else
+        {
+            <span class="task-course-name">Fristående uppgift</span>
+        }
 
-    @* Show the checklist only if the task has checklist items. *@
+        <span>
+            Prioritet:
+            @(task.Priority == 3 ? "Hög" :
+              task.Priority == 2 ? "Medel" : "Låg")
+        </span>
+
+        @if (task.Deadline.HasValue)
+        {
+            <span>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</span>
+        }
+    </button>
+
     @if (task.ChecklistItems.Any())
     {
         var completed = task.ChecklistItems.Count(item => item.IsCompleted);
         var total = task.ChecklistItems.Count;
 
         <div class="task-card-checklist">
-            <ul>
-                @foreach (var item in task.ChecklistItems.OrderBy(item => item.IsCompleted).ThenBy(item =>
-    item.Id))
-                {
-                    <li data-order="@item.Id">
-                        <label>
-                            <input type="checkbox" class="checklist-checkbox" data-item-id="@item.Id"
-                                   checked="@item.IsCompleted" />
-                            @item.Title
-                        </label>
-                    </li>
-                }
-            </ul>
 
-            @* Display completed items and overall checklist progress. *@
+            @* Hand-drawn divider between task details and checklist. *@
+            <svg class="task-card-divider" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M3 9 Q150 1 297 9" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" />
+            </svg>
+
+            @* Collapsible checklist items. *@
+            <details class="task-checklist-details">
+                <summary>
+                    <h4>My checklist</h4>
+                    <iconify-icon icon="lucide:chevron-down" aria-hidden="true"></iconify-icon>
+                </summary>
+
+                <div class="task-checklist-scroll">
+                    <ul>
+                        @foreach (var item in task.ChecklistItems
+                            .OrderBy(item => item.IsCompleted)
+                            .ThenBy(item => item.Id))
+                        {
+                            <li data-order="@item.Id">
+                                <label>
+                                    <input type="checkbox"
+                                           class="checklist-checkbox"
+                                           data-item-id="@item.Id"
+                                           checked="@item.IsCompleted" />
+                                    @item.Title
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </details>
+
+            @* Progress remains visible when the checklist is collapsed. *@
             <p class="checklist-count">@completed/@total done</p>
+
             <progress class="checklist-progress" value="@completed" max="@total">
             </progress>
+
         </div>
     }
 </li>

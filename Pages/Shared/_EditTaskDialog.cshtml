@@ -1,76 +1,100 @@
-@* Recieve the task to edit.*@
+@* Receive the task to edit. *@
 @model StudyFlow.Models.StudyTask
 
 @{
     var task = Model;
 }
- 
-<dialog id="editTaskDialog-@task.Id" aria-labelledby="editTaskHeading-@task.Id">
-    <h2 id="editTaskHeading-@task.Id">Redigera uppgift</h2>
 
-    @* Form for editing an existing task. *@
-    <form method="post" asp-page-handler="EditTask" class="edit-task-form" novalidate>
-        <input type="hidden" name="taskId" value="@task.Id" />
+<dialog id="editTaskDialog-@task.Id" class="course-dialog edit-task-dialog"
+        style="--task-dialog-color: @(task.Course?.Color ?? "#D6CBFC")" aria-labelledby="editTaskHeading-@task.Id">
 
-        @* Displays validation errors handled by JavaScript. *@
-        <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
+    <div class="course-dialog-content edit-task-dialog-content">
 
-        <div>
-            <label for="editTitle-@task.Id">Uppgiftens namn</label>
-            <input id="editTitle-@task.Id" name="title" value="@task.Title" maxlength="100" />
-        </div>
+        <button type="button" class="close-edit-task-dialog edit-task-dialog-close" aria-label="Close dialog">
+            <iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon>
+        </button>
 
-        <div>
-            <label for="editDescription-@task.Id">Beskrivning</label>
-            <textarea id="editDescription-@task.Id" name="description" rows="4"
-                      maxlength="1000">@task.Description</textarea>
-        </div>
+        <h2 id="editTaskHeading-@task.Id">Edit task</h2>
 
-        <div>
-            <label for="editDeadline-@task.Id">Deadline</label>
-            <input id="editDeadline-@task.Id" name="deadline" type="date"
-                   value="@(task.Deadline?.ToString("yyyy-MM-dd"))" />
-        </div>
+        @* Form for editing an existing task. *@
+        <form method="post" asp-page-handler="EditTask" class="edit-task-form create-task-form" novalidate>
 
-        <div>
-            <label for="editPriority-@task.Id">Prioritet</label>
-            <select id="editPriority-@task.Id" name="priority">
-                <option value="1" selected="@(task.Priority == 1)">Låg</option>
-                <option value="2" selected="@(task.Priority == 2)">Medel</option>
-                <option value="3" selected="@(task.Priority == 3)">Hög</option>
-            </select>
-        </div>
+            <input type="hidden" name="taskId" value="@task.Id" />
 
-        <div>
-            <label for="editHours-@task.Id">Uppskattad arbetsinsats (timmar)</label>
-            <input id="editHours-@task.Id" name="estimatedHours" type="number" min="0" max="1000" step="0.5"
-                   value="@task.EstimatedHours" />
-        </div>
+            @* Displays validation errors handled by JavaScript. *@
+            <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
 
-        <section>
-            <h3>Redigera checklista</h3>
-
-            <div class="edit-checklist-items">
-
-                @* Render existing checklist items for editing. *@
-                @foreach (var item in task.ChecklistItems.OrderBy(i => i.Id))
-                {
-                    <button type="button" class="remove-checklist-row">
-                        Ta bort
-                    </button>
-                    <div class="edit-checklist-row">
-                        <input type="hidden" name="itemIds" value="@item.Id" />
-                        <input type="text" name="itemTitles" value="@item.Title" maxlength="100" aria-label="Delmoment" />
-                    </div>
-                }
+            <div class="task-form-field">
+                <label for="editTitle-@task.Id">Task name</label>
+                <input id="editTitle-@task.Id" name="title" value="@task.Title" maxlength="100" />
             </div>
 
-            <button type="button" class="add-checklist-row">
-                Lägg till delmoment
-            </button>
-        </section>
+            <div class="task-form-field">
+                <label for="editDescription-@task.Id">Description</label>
+                <textarea id="editDescription-@task.Id" name="description" rows="4"
+                          maxlength="1000">@task.Description</textarea>
+            </div>
 
-        <button type="submit">Spara ändringar</button>
-        <button type="button" class="close-edit-task-dialog">Avbryt</button>
-    </form>
+            <div class="task-form-field">
+                <label for="editDeadline-@task.Id">Deadline</label>
+                <input id="editDeadline-@task.Id" name="deadline" type="date"
+                       value="@(task.Deadline?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            @* Priority and estimated hours share a row on larger screens. *@
+            <div class="task-form-row">
+                <div class="task-form-field">
+                    <label for="editPriority-@task.Id">Priority</label>
+                    <select id="editPriority-@task.Id" name="priority">
+                        <option value="1" selected="@(task.Priority == 1)">Low</option>
+                        <option value="2" selected="@(task.Priority == 2)">Medium</option>
+                        <option value="3" selected="@(task.Priority == 3)">High</option>
+                    </select>
+                </div>
+
+                <div class="task-form-field">
+                    <label for="editHours-@task.Id">Estimated hours</label>
+                    <input id="editHours-@task.Id" name="estimatedHours" type="number" min="0" max="1000" step="0.5"
+                           value="@task.EstimatedHours.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                </div>
+            </div>
+
+            <section class="create-task-checklist edit-task-checklist">
+                <h3>Edit checklist</h3>
+
+                <div class="edit-checklist-items">
+
+                    @* Render existing checklist items for editing. *@
+                    @foreach (var item in task.ChecklistItems.OrderBy(i => i.Id))
+                    {
+                        <div class="edit-checklist-row">
+                            <input type="hidden" name="itemIds" value="@item.Id" />
+
+                            <input type="text" name="itemTitles" value="@item.Title" maxlength="100"
+                                   aria-label="Checklist item" />
+
+                            <button type="button" class="remove-checklist-row">
+                                Remove
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <button type="button" class="add-checklist-row add-new-checklist-item">
+                    <iconify-icon icon="lucide:plus" aria-hidden="true"></iconify-icon>
+                    Add checklist item
+                </button>
+            </section>
+
+            <div class="edit-task-actions">
+                <button type="button" class="close-edit-task-dialog cancel-edit-task-btn">
+                    Cancel
+                </button>
+
+                <button type="submit" class="save-edit-task-btn">
+                    Save changes
+                </button>
+            </div>
+        </form>
+    </div>
 </dialog>
