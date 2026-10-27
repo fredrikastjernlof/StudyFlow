@@ -13,6 +13,15 @@
             data-task-id="@task.Id">
 
         <h3 class="task-card-title">@task.Title</h3>
+        
+         @if (task.Course != null)
+        {
+            <span class="task-course-name">@task.Course.Name</span>
+        }
+        else
+        {
+            <span class="task-course-name">Fristående uppgift</span>
+        }
 
         @if (!string.IsNullOrWhiteSpace(task.Description))
         {

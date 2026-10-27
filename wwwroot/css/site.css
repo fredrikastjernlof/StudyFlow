@@ -24,12 +24,6 @@ h1 {
   box-shadow: 1px 2px 3px rgba(55, 38, 35, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.35);
 }
 
-.header .navbar-brand {
-  font-family: "Amatic SC", sans-serif;
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
 .header {
   background-color: var(--color-primary);
 }
@@ -43,7 +37,7 @@ h1 {
   font-family: "Amatic SC", sans-serif;
   color: var(--color-text);
   font-weight: 700;
-  font-size: 2.5rem;
+  font-size: 4rem;
 }
 .header .navbar-nav {
   gap: 0.75rem;
@@ -192,6 +186,121 @@ h1 {
     border-radius: 0;
     box-shadow: none;
   }
+}
+
+.dashboard .board-task-list {
+  padding-left: 0;
+}
+.dashboard .tasks-board-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+.dashboard .todays-focus-section .focus-task-list {
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+}
+.dashboard .coming-up-section {
+  gap: 0.5rem;
+}
+.dashboard .coming-up-section .board-task-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
+}
+@media (max-width: 768px) {
+  .dashboard .coming-up-section .board-task-list {
+    grid-template-columns: 1fr;
+  }
+}
+.dashboard .dashboard-tasks-link,
+.dashboard .dashboard-courses-link {
+  display: block;
+  width: fit-content;
+  margin: 1.5rem 0 0 auto;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.dashboard .dashboard-tasks-link:hover,
+.dashboard .dashboard-courses-link:hover {
+  text-decoration: underline;
+}
+.dashboard .coming-up-section .dashboard-tasks-link {
+  margin-top: 0;
+}
+
+.dashboard-course-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+.dashboard-course-list .course-card {
+  aspect-ratio: 1;
+  min-height: 0;
+  transition: transform 0.2s ease;
+}
+.dashboard-course-list .course-card:hover {
+  transform: rotate(0deg) translateY(-4px);
+}
+.dashboard-course-list .course-grid-item {
+  transform: none;
+}
+.dashboard-course-list .course-grid-item:nth-child(even), .dashboard-course-list .course-grid-item:nth-child(3n), .dashboard-course-list .course-grid-item:hover {
+  transform: none;
+}
+.dashboard-course-list .course-grid-item .course-card::before {
+  display: none;
+}
+@media (max-width: 768px) {
+  .dashboard-course-list {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-course-list .course-card {
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+}
+
+.completed-tasks-note {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  width: min(100%, 280px);
+  min-height: 240px;
+  margin: auto;
+  padding: 1.5rem;
+  background-color: #e8d7ff;
+  color: var(--color-text);
+  box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.completed-tasks-note:hover {
+  transform: rotate(0deg) translateY(-4px);
+}
+.completed-tasks-note .completed-tasks-icons {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+.completed-tasks-note .completed-tasks-count,
+.completed-tasks-note .completed-tasks-message {
+  font-family: "Amatic SC", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 button:not(.logout-btn, .navbar-toggler, .task-dialog-close),
@@ -1527,6 +1636,53 @@ button:not(.logout-btn, .navbar-toggler, .task-dialog-close),
   }
 }
 
+#completed-tasks:target .board-note-heading {
+  transform-origin: center top;
+  animation: completed-wiggle 0.8s ease-in-out 0.8s;
+}
+
+@keyframes completed-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20%, 60% {
+    transform: rotate(-6deg);
+  }
+  40%, 80% {
+    transform: rotate(6deg);
+  }
+}
+#completed-tasks:target .task-card-compact {
+  transform-origin: center top;
+  animation: completed-card-dance 1.6s ease-in-out 1.6s;
+}
+
+#completed-tasks:target .task-card-compact:nth-child(even) {
+  animation-delay: 1.8s;
+  animation-direction: reverse;
+}
+
+#completed-tasks:target .task-card-compact:nth-child(3n) {
+  animation-delay: 2s;
+}
+
+@keyframes completed-card-dance {
+  0%, 35%, 55%, 100% {
+    transform: rotate(0deg);
+  }
+  8%, 63% {
+    transform: rotate(-2deg);
+  }
+  16%, 71% {
+    transform: rotate(2deg);
+  }
+  24%, 79% {
+    transform: rotate(-1.5deg);
+  }
+  30%, 85% {
+    transform: rotate(1.5deg);
+  }
+}
 .create-task-form {
   display: flex;
   flex-direction: column;

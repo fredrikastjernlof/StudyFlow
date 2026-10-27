@@ -125,3 +125,148 @@
         }
     }
 }
+
+// Task card layout
+
+.dashboard {
+
+    .board-task-list {
+        padding-left: 0;
+    }
+
+    .tasks-board-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        min-width: 0;
+    }
+
+    .todays-focus-section {
+        .focus-task-list {
+            width: 100%;
+            max-width: 420px;
+            margin-inline: auto;
+        }
+    }
+
+    .coming-up-section {
+        gap: 0.5rem;
+
+        .board-task-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            width: 100%;
+            max-width: 600px;
+            margin-inline: auto;
+        }
+    }
+
+
+    @media (max-width: 768px) {
+        .coming-up-section .board-task-list {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .dashboard-tasks-link,
+    .dashboard-courses-link {
+        display: block;
+        width: fit-content;
+        margin: 1.5rem 0 0 auto;
+
+        color: var(--color-text);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .coming-up-section .dashboard-tasks-link {
+        margin-top: 0;
+    }
+}
+
+// Course card layout.
+.dashboard-course-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    padding: 0;
+    list-style: none;
+
+    .course-card {
+        aspect-ratio: 1;
+        min-height: 0;
+        transition: transform 0.2s ease;
+
+        &:hover {
+            transform: rotate(0deg) translateY(-4px);
+        }
+    }
+
+    .course-grid-item {
+        transform: none;
+
+        &:nth-child(even),
+        &:nth-child(3n),
+        &:hover {
+            transform: none;
+        }
+
+        .course-card::before {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+
+        .course-card {
+            aspect-ratio: auto;
+            min-height: 0;
+        }
+    }
+}
+
+.completed-tasks-note {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+
+    width: min(100%, 280px);
+    min-height: 240px;
+    margin: auto;
+    padding: 1.5rem;
+
+    background-color: #e8d7ff;
+    color: var(--color-text);
+    box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.15);
+
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: rotate(0deg) translateY(-4px);
+    }
+
+    .completed-tasks-icons {
+        font-size: 2.5rem;
+        line-height: 1;
+    }
+
+    .completed-tasks-count,
+    .completed-tasks-message {
+        font-family: "Amatic SC", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+}

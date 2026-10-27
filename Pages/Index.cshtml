@@ -1,4 +1,5 @@
-﻿@page
+﻿
+@page
 @model IndexModel
 
 @{
@@ -11,129 +12,108 @@
 {
     <main class="dashboard">
 
-        <h1><span class="tape-heading">Dashboard</span></h1>
+        <h1>
+            <span class="tape-heading">Dashboard</span>
+        </h1>
 
         <div class="dashboard-book">
 
-            <!-- LEFT PAGE -->
+            @* Left page. *@
             <section class="dashboard-book-page">
 
-                <h2>Today's focus</h2>
+                @* Today's focus. *@
+                <section class="tasks-board-section todays-focus-section">
+                    <h2 class="board-note-heading">
+                        Today's focus
+                    </h2>
 
-                @if (Model.TodaysFocus != null)
-                {
-                    var task = Model.TodaysFocus.Task;
-                    var checklist = task.ChecklistItems.ToList();
-                    var completedItems = checklist.Count(item => item.IsCompleted);
-                    var progress = checklist.Count > 0
-                        ? (int)Math.Round(100.0 * completedItems / checklist.Count)
-                        : 0;
-
-                    <article class="dashboard-focus">
-
-                        <h3>@task.Title</h3>
-
-                        <p>
-                            @(task.Course?.Name ?? "Fristående uppgift")
+                    @if (Model.TodaysFocus != null)
+                    {
+                        <ul class="board-task-list focus-task-list">
+                            <partial name="_TaskCard"
+                                     model="Model.TodaysFocus.Task" />
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="board-empty-message">
+                            No tasks to prioritize right now.
                         </p>
+                    }
+                </section>
 
-                        @if (task.Deadline.HasValue)
-                        {
-                            <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
-                        }
-
-                        <h4>My checklist</h4>
-
-                        @if (checklist.Any())
-                        {
-                            <ul class="dashboard-checklist">
-                                @foreach (var item in checklist)
-                                {
-                                    <li>
-                                        <input type="checkbox"
-                                               checked="@item.IsCompleted"
-                                               disabled />
-                                        <span>@item.Title</span>
-                                    </li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <p>Inga delmoment har lagts till.</p>
-                        }
-
-                        <h4>Progress</h4>
-
-                        <progress value="@progress" max="100"></progress>
-                        <p>@progress % klart</p>
-
-                    </article>
-                }
-                else
-                {
-                    <p>Inga uppgifter att prioritera just nu.</p>
-                }
-
+                @* Completed tasks summary. *@
                 <section class="dashboard-completed">
                     <h2>All the small things</h2>
-                    <p>Du har slutfört @Model.CompletedTaskCount uppgifter!</p>
+                    <a asp-page="/Tasks/Index"
+                        asp-fragment="completed-tasks"
+                        class="completed-tasks-note">
+                        <p class="completed-tasks-icons">
+                            ⭐️ 🏆 ⭐️
+                        </p>
+                        <p class="completed-tasks-count">
+                            You have completed @Model.CompletedTaskCount tasks! 
+                        </p>
+                        <p class="completed-tasks-message">
+                            Well done!
+                        </p>
+                    </a>
                 </section>
 
             </section>
 
-            <!-- RIGHT PAGE -->
+            @* Right page. *@
             <section class="dashboard-book-page">
 
-                <h2>Coming up</h2>
+                @* Coming up. *@
+                <section class="tasks-board-section coming-up-section">
+                    <h2 class="board-note-heading">
+                        Coming up
+                    </h2>
 
-                @if (Model.ComingUp.Any())
-                {
-                    <div class="dashboard-upcoming">
-                        @foreach (var task in Model.ComingUp)
-                        {
-                            <article class="dashboard-note">
-                                <h3>@task.Title</h3>
+                    @if (Model.ComingUp.Any())
+                    {
+                        <ul class="board-task-list">
+                            @foreach (var task in Model.ComingUp.Take(4))
+                            {
+                                <partial name="_TaskCardCompact"
+                                         model="task" />
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="board-empty-message">
+                            No upcoming tasks.
+                        </p>
+                    }
 
-                                <p>@(task.Course?.Name ?? "Fristående uppgift")</p>
+                    <a asp-page="/Tasks/Index" class="dashboard-tasks-link">
+                        Show all tasks →
+                    </a>
+                </section>
 
-                                @if (task.Deadline.HasValue)
-                                {
-                                    <p>Deadline: @task.Deadline.Value.ToString("yyyy-MM-dd")</p>
-                                }
-                            </article>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p>Inga kommande uppgifter.</p>
-                }
-
+                @* Course overview. *@
                 <section class="dashboard-courses">
-
                     <h2>My little study corner</h2>
 
                     @if (Model.Courses.Any())
                     {
-                        <div class="dashboard-course-list">
-                            @foreach (var course in Model.Courses)
+                        <ul class="dashboard-course-list">
+                            @foreach (var course in Model.Courses.Take(2))
                             {
-                                <a asp-page="/Courses/Details"
-                                   asp-route-id="@course.Id"
-                                   class="dashboard-course-note">
-                                    @course.Name
-                                </a>
+                                <partial name="_CourseCard" model="course" />
                             }
-                        </div>
+                        </ul>
                     }
                     else
                     {
                         <p>Du har inte lagt till några kurser ännu.</p>
                     }
 
-                    <a asp-page="/Courses/Index">Visa alla kurser</a>
-
+                    <a asp-page="/Courses/Index" class="dashboard-courses-link">
+                        Show all courses →
+                    </a>
                 </section>
 
             </section>
@@ -166,4 +146,31 @@ else
         </div>
 
     </main>
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    @if (Model.TodaysFocus != null)
+    {
+        var task = Model.TodaysFocus.Task;
+
+        <partial name="_TaskDetailsDialog" model="task" />
+        <partial name="_EditTaskDialog" model="task" />
+        <partial name="_DeleteTaskDialog" model="task" />
+    }
+
+    @foreach (var task in Model.ComingUp.Take(4)
+        .Where(task => task.Id != Model.TodaysFocus?.Task.Id))
+    {
+        <partial name="_TaskDetailsDialog" model="task" />
+        <partial name="_EditTaskDialog" model="task" />
+        <partial name="_DeleteTaskDialog" model="task" />
+    }
+}
+
+@section Scripts {
+    <script src="~/js/task-form-validation.js"
+            asp-append-version="true"></script>
+    <script src="~/js/tasks.js"
+            asp-append-version="true"></script>
 }

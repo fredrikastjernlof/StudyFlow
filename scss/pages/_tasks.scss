@@ -406,3 +406,71 @@
         }
     }
 }
+
+// Wiggle when arriving from the dashboard.
+#completed-tasks:target .board-note-heading {
+    transform-origin: center top;
+    animation: completed-wiggle 0.8s ease-in-out 0.8s;
+}
+
+@keyframes completed-wiggle {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    20%,
+    60% {
+        transform: rotate(-6deg);
+    }
+
+    40%,
+    80% {
+        transform: rotate(6deg);
+    }
+}
+
+#completed-tasks:target .task-card-compact {
+    transform-origin: center top;
+    animation: completed-card-dance 1.6s ease-in-out 1.6s;
+}
+
+#completed-tasks:target .task-card-compact:nth-child(even) {
+    animation-delay: 1.8s;
+    animation-direction: reverse;
+}
+
+#completed-tasks:target .task-card-compact:nth-child(3n) {
+    animation-delay: 2s;
+}
+
+@keyframes completed-card-dance {
+
+    0%,
+    35%,
+    55%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    8%,
+    63% {
+        transform: rotate(-2deg);
+    }
+
+    16%,
+    71% {
+        transform: rotate(2deg);
+    }
+
+    24%,
+    79% {
+        transform: rotate(-1.5deg);
+    }
+
+    30%,
+    85% {
+        transform: rotate(1.5deg);
+    }
+}
