@@ -1,11 +1,11 @@
-
-button:not(.logout-btn, .navbar-toggler),
-.btn:not(.logout-btn, .navbar-toggler) {
+button:not(.logout-btn, .navbar-toggler, .task-dialog-close),
+.btn:not(.logout-btn, .navbar-toggler, .task-dialog-close) {
   box-shadow: 0 3px 8px rgb(55 38 35 / 90%);
 }
 
-// LÄGG TILL NY KURS
-.add-course-btn {
+// ADD COURSE / ADD TASK
+.add-course-btn,
+.add-task-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
@@ -20,7 +20,8 @@ button:not(.logout-btn, .navbar-toggler),
   font-weight: 600;
   cursor: pointer;
 
-  .add-course-icon {
+  .add-course-icon,
+  .add-task-icon {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -32,7 +33,9 @@ button:not(.logout-btn, .navbar-toggler),
     iconify-icon:first-child {
       font-size: 1.6rem;
     }
+  }
 
+  .add-course-icon {
     iconify-icon:last-child {
       position: absolute;
       right: -0.3rem;
@@ -48,7 +51,7 @@ button:not(.logout-btn, .navbar-toggler),
   }
 }
 
-// AVBRYT
+// CANCEL
 .cancel-btn {
   display: inline-flex;
   align-items: center;

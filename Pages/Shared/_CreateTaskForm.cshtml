@@ -34,36 +34,40 @@
         <div class="validation-summary text-danger" role="alert" aria-live="polite" hidden></div>
     }
 
-    @* Course selection is only displayed when creating a task outside a course. *@
-    @if (showCourseSelect)
-    {
+    
+    <div class="task-form-top-row">
         <div class="task-form-field">
-            <label for="CourseId">Course (optional)</label>
-            <select id="CourseId" name="CourseId">
-                <option value="">No course</option>
+            <label for="TaskInput_Title">Task name</label>
+            <input id="TaskInput_Title" name="TaskInput.Title" value="@Model.Title" maxlength="100"
+                   placeholder="Enter task name" autocomplete="off" />
+        </div>
 
-                @if (courses != null)
-                {
-                    @foreach (var course in courses)
+        @* Course selection is only displayed when creating a task outside a course. *@
+    
+        @if (showCourseSelect)
+        {
+            <div class="task-form-field">
+                <label for="CourseId">Course (optional)</label>
+                <select id="CourseId" name="CourseId">
+                    <option value="">No course</option>
+
+                    @if (courses != null)
                     {
-                        if (selectedCourseId == course.Id.ToString())
+                        @foreach (var course in courses)
                         {
-                            <option value="@course.Id" selected>@course.Name</option>
-                        }
-                        else
-                        {
-                            <option value="@course.Id">@course.Name</option>
+                            if (selectedCourseId == course.Id.ToString())
+                            {
+                                <option value="@course.Id" selected>@course.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@course.Id">@course.Name</option>
+                            }
                         }
                     }
-                }
-            </select>
-        </div>
-    }
-
-    <div class="task-form-field">
-        <label for="TaskInput_Title">Task name</label>
-        <input id="TaskInput_Title" name="TaskInput.Title" value="@Model.Title" maxlength="100"
-               placeholder="Enter task name" autocomplete="off" />
+                </select>
+            </div>
+        }
     </div>
 
     <div class="task-form-field">

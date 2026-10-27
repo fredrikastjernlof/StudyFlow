@@ -127,12 +127,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const form = select.closest("form");
             if (!form) return;
 
+            const formData = new FormData(form);
             select.disabled = true;
 
             try {
                 const response = await fetch(form.action, {
                     method: "POST",
-                    body: new FormData(form)
+                    body: formData
                 });
 
                 if (!response.ok) throw new Error("Failed to save status.");

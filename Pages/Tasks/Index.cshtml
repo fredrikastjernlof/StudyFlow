@@ -16,97 +16,151 @@
         .ToList();
 
     var completed = Model.Tasks
-        .Where(t => t.Status == "Completed")
+        .Where(task => task.Status == "Completed")
         .ToList();
 }
 
-<h1><span class="tape-heading">My tasks</span></h1>
+<div class="tasks-page">
+    <header class="tasks-page-header">
+        <h1>
+            <span class="tape-heading">My tasks</span>
+        </h1>
 
-<button type="button" id="open-create-task-dialog">
-    + Add task
-</button>
-
-<dialog id="create-task-dialog" aria-labelledby="create-task-heading"
-        data-open-on-load="@Model.OpenCreateDialog.ToString().ToLowerInvariant()">
-
-    <div class="create-task-dialog-header">
-        <h2 id="create-task-heading">Add task</h2>
-
-        <button type="button" id="close-create-task-dialog">
-            Close
+        <button type="button"
+                id="open-create-task-dialog"
+                class="add-task-btn">
+            <span class="add-task-icon" aria-hidden="true">
+                <iconify-icon icon="lucide:sticky-note-plus"></iconify-icon>
+            </span>
+            Add task
         </button>
+    </header>
+
+    @* Create task dialog. *@
+    <dialog id="create-task-dialog"
+            class="create-task-dialog"
+            aria-labelledby="create-task-heading"
+            data-open-on-load="@Model.OpenCreateDialog.ToString().ToLowerInvariant()">
+
+        <div class="course-dialog-content">
+
+            <div class="create-task-dialog-header">
+                <h2 id="create-task-heading">Add task</h2>
+
+                <button type="button"
+                        id="close-create-task-dialog"
+                        class="task-dialog-close"
+                        aria-label="Close dialog">
+                    <iconify-icon icon="lucide:x" aria-hidden="true"></iconify-icon>
+                </button>
+            </div>
+
+            <partial name="_CreateTaskForm"
+                     model="Model.TaskInput"
+                     view-data="ViewData" />
+
+        </div>
+    </dialog>
+
+    @* Bulletin board with two columns on desktop. *@
+    <div class="bulletin-board tasks-board">
+
+        @* Left column. *@
+        <div class="tasks-board-column">
+
+            <section class="tasks-board-section todays-focus-section">
+                <h2 class="board-note-heading">
+                    Today's focus
+                </h2>
+
+                @if (Model.TodaysFocus != null)
+                {
+                    <ul class="board-task-list focus-task-list">
+                        <partial name="_TaskCard"
+                                 model="Model.TodaysFocus.Task" />
+                    </ul>
+                }
+                else
+                {
+                    <p class="board-empty-message">
+                        No tasks to prioritize right now.
+                    </p>
+                }
+            </section>
+
+            <section class="tasks-board-section in-progress-section">
+                <h2 class="board-note-heading">
+                    Work in progress
+                </h2>
+
+                @if (inProgress.Any())
+                {
+                    <ul class="board-task-list">
+                        @foreach (var task in inProgress)
+                        {
+                            <partial name="_TaskCardCompact" model="task" />
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="board-empty-message">
+                        No tasks in progress.
+                    </p>
+                }
+            </section>
+
+        </div>
+
+        @* Right column. *@
+        <div class="tasks-board-column">
+
+            <section class="tasks-board-section coming-up-section">
+                <h2 class="board-note-heading">
+                    Coming up
+                </h2>
+
+                @if (comingUp.Any())
+                {
+                    <ul class="board-task-list">
+                        @foreach (var task in comingUp)
+                        {
+                            <partial name="_TaskCardCompact" model="task" />
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="board-empty-message">
+                        No upcoming tasks.
+                    </p>
+                }
+            </section>
+
+            <section class="tasks-board-section completed-section">
+                <h2 class="board-note-heading">
+                    Completed
+                </h2>
+
+                @if (completed.Any())
+                {
+                    <ul class="board-task-list">
+                        @foreach (var task in completed)
+                        {
+                            <partial name="_TaskCardCompact" model="task" />
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="board-empty-message">
+                        No completed tasks.
+                    </p>
+                }
+            </section>
+
+        </div>
     </div>
-
-    <partial name="_CreateTaskForm" model="Model.TaskInput" view-data="ViewData" />
-</dialog>
-
-<div class="tasks-book">
-
-    <section class="tasks-book-page">
-        <h2>Today's focus</h2>
-
-        @if (Model.TodaysFocus != null)
-        {
-            <ul>
-                <partial name="_TaskCard" model="Model.TodaysFocus.Task" />
-            </ul>
-        }
-        else
-        {
-            <p>No tasks to prioritize right now.</p>
-        }
-
-        <h2>Work in progress</h2>
-
-        @if (inProgress.Any())
-        {
-            <ul>
-                @foreach (var task in inProgress)
-                {
-                    <partial name="_TaskCard" model="task" />
-                }
-            </ul>
-        }
-        else
-        {
-            <p>No tasks in progress.</p>
-        }
-    </section>
-
-    <section class="tasks-book-page">
-        <h2>Coming up</h2>
-
-        @if (comingUp.Any())
-        {
-            <ul>
-                @foreach (var task in comingUp)
-                {
-                    <partial name="_TaskCard" model="task" />
-                }
-            </ul>
-        }
-        else
-        {
-            <p>No upcoming tasks.</p>
-        }
-
-        <h2>Completed</h2>
-
-        @if (completed.Any())
-        {
-            <ul>
-                @foreach (var task in completed)
-                {
-                    <partial name="_TaskCard" model="task" />
-                }
-            </ul>
-        }
-        else
-        {
-            <p>No completed tasks.</p>
-        }
-    </section>
-
 </div>
 
 @foreach (var task in Model.Tasks)
@@ -117,6 +171,8 @@
 }
 
 @section Scripts {
-    <script src="~/js/task-form-validation.js" asp-append-version="true"></script>
-    <script src="~/js/tasks.js" asp-append-version="true"></script>
+    <script src="~/js/task-form-validation.js"
+            asp-append-version="true"></script>
+    <script src="~/js/tasks.js"
+            asp-append-version="true"></script>
 }
