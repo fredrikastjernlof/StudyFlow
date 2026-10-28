@@ -38,13 +38,13 @@ public class DetailsModel : PageModel
 
     // Fields used when editing a course.
     [BindProperty]
-    [Required(ErrorMessage = "Du måste ange ett kursnamn.")]
-    [StringLength(100, ErrorMessage = "Kursnamnet får innehålla högst 100 tecken.")]
+    [Required(ErrorMessage = "You must enter a course name.")]
+    [StringLength(100, ErrorMessage = "The course name cannot exceed 100 characters.")]
     public string CourseName { get; set; } = string.Empty;
 
     [BindProperty]
     [Required]
-    [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Ogiltig färgkod.")]
+    [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Invalid color code.")]
     public string CourseColor { get; set; } = "#B8D8C0";
 
     // Form data for creating a new study task.
@@ -99,17 +99,18 @@ public class DetailsModel : PageModel
         // Validate the submitted course details.
         ModelState.Clear();
         if (string.IsNullOrWhiteSpace(CourseName))
-            ModelState.AddModelError(nameof(CourseName), "Du måste ange ett kursnamn.");
+            ModelState.AddModelError(nameof(CourseName), "You must enter a course name.");
         else if (CourseName.Trim().Length > 100)
-            ModelState.AddModelError(nameof(CourseName), "Kursnamnet får innehålla högst 100 tecken.");
+            ModelState.AddModelError(nameof(CourseName), "The course name cannot exceed 100 characters.");
 
         if (string.IsNullOrWhiteSpace(CourseColor) ||
             !System.Text.RegularExpressions.Regex.IsMatch(CourseColor, "^#[0-9A-Fa-f]{6}$"))
-            ModelState.AddModelError(nameof(CourseColor), "Ogiltig färgkod.");
+            ModelState.AddModelError(nameof(CourseColor), "Invalid color code.");
 
         if (!ModelState.IsValid)
         {
             Tasks = await _taskService.GetCourseTasksAsync(id, userId!);
+            TodaysFocus = _taskPriorityService.GetTodaysFocus(Tasks);
             return Page();
         }
 
@@ -164,15 +165,19 @@ public class DetailsModel : PageModel
         ModelState.Clear();
         ValidateTask(TaskInput.Title, TaskInput.Description, TaskInput.Deadline,
             TaskInput.Priority, TaskInput.EstimatedHours, "TaskInput.", invalidPriority, invalidHours, invalidDate);
-        if (checklistItems.Any(x => !string.IsNullOrWhiteSpace(x) && x.Trim().Length > 100))
-            ModelState.AddModelError("checklistItems", "Checklist items must not exceed 100 characters.");
+        if (checklistItems.Any(item =>
+            string.IsNullOrWhiteSpace(item) || item.Trim().Length > 100))
+        {
+            ModelState.AddModelError(
+                "checklistItems", "Checklist items must contain 1–100 characters.");
+        }
 
         if (!ModelState.IsValid)
         {
             Course = course;
             CourseName = course.Name;
             CourseColor = course.Color;
-            ViewData["PostedChecklistItems"] = checklistItems.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            ViewData["PostedChecklistItems"] = checklistItems;
 
             Tasks = await _taskService.GetCourseTasksAsync(id, userId!);
 
@@ -333,8 +338,6 @@ public class DetailsModel : PageModel
 
         return RedirectToPage("./Details", new { id });
     }
-
-    // Shared server-side validation for creating and editing tasks.
 
     // Shared server-side validation for creating and editing tasks.
     private void ValidateTask(string? title, string? description, DateTime? deadline,

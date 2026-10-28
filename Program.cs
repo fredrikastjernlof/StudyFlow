@@ -21,10 +21,10 @@ builder.Services.AddScoped<CourseService>();
 // Register the service for managing study tasks.
 builder.Services.AddScoped<TaskService>();
 
-// Register the service for managing checklistitems
+// Register the service for managing checklist items.
 builder.Services.AddScoped<ChecklistService>();
 
-// Register the service for task prioritys
+// Register the service for calculating task priorities.
 builder.Services.AddScoped<TaskPriorityService>();
 
 var app = builder.Build();

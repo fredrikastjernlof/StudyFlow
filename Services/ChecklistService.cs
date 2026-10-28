@@ -73,7 +73,7 @@ public class ChecklistService
         return true;
     }
 
-    // Delete a checklist item belonging to the specified user and course.
+    // Delete a checklist item belonging to a task owned by the user.
     public async Task<bool> DeleteChecklistItemAsync(
         int itemId,
         int? courseId,

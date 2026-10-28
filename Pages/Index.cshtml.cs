@@ -8,7 +8,6 @@ using StudyFlow.ViewModels;
 
 namespace StudyFlow.Pages;
 
-[Authorize]
 public class IndexModel : PageModel
 {
     private readonly TaskService _taskService;
@@ -154,33 +153,33 @@ public class IndexModel : PageModel
         ModelState.Clear();
 
         if (string.IsNullOrWhiteSpace(title))
-            ModelState.AddModelError("title", "Du måste ange ett namn på uppgiften.");
+            ModelState.AddModelError("title", "Task title is required.");
         else if (title.Trim().Length > 100)
-            ModelState.AddModelError("title", "Uppgiftens namn får innehålla högst 100 tecken.");
+            ModelState.AddModelError("title", "Task title cannot exceed 100 characters.");
 
         if ((description?.Length ?? 0) > 1000)
-            ModelState.AddModelError("description", "Beskrivningen får innehålla högst 1000 tecken.");
+            ModelState.AddModelError("description", "Description cannot exceed 1000 characters.");
 
         if (invalidPriority || priority < 1 || priority > 3)
-            ModelState.AddModelError("priority", "Välj en giltig prioritet.");
+            ModelState.AddModelError("priority", "Please select a valid priority.");
 
         if (invalidHours || !double.IsFinite(estimatedHours) ||
             estimatedHours < 0 || estimatedHours > 1000)
-            ModelState.AddModelError("estimatedHours", "Arbetsinsatsen måste vara mellan 0 och 1000 timmar.");
+            ModelState.AddModelError("estimatedHours", "Estimated hours must be between 0 and 1000.");
 
         if (invalidDate)
-            ModelState.AddModelError("deadline", "Ange ett giltigt datum.");
+            ModelState.AddModelError("deadline", "Please enter a valid date.");
         else if (deadline.HasValue && deadline.Value.Date < DateTime.Today)
-            ModelState.AddModelError("deadline", "Deadline får inte ligga bakåt i tiden.");
+            ModelState.AddModelError("deadline", "Deadline cannot be in the past.");
 
         if (itemIds.Count != itemTitles.Count ||
             itemIds.Count != itemIds.Distinct().Count() ||
             itemIds.Any(id => task.ChecklistItems.All(i => i.Id != id)))
-            return BadRequest("Ogiltiga checklistuppgifter.");
+            return BadRequest("Invalid checklist items.");
 
         if (itemTitles.Any(t => string.IsNullOrWhiteSpace(t) || t.Trim().Length > 100) ||
             newItemTitles.Any(t => string.IsNullOrWhiteSpace(t) || t.Trim().Length > 100))
-            ModelState.AddModelError("checklist", "Delmoment måste innehålla 1–100 tecken.");
+            ModelState.AddModelError("checklist", "Checklist items must contain 1–100 characters.");
 
         if (!ModelState.IsValid)
             return BadRequest(string.Join(" ",
@@ -192,7 +191,7 @@ public class IndexModel : PageModel
             title, description, deadline, priority, estimatedHours,
             itemIds, itemTitles, newItemTitles);
 
-        if (!updated) return BadRequest("Uppgiften kunde inte uppdateras.");
+        if (!updated) return BadRequest("The task could not be updated");
 
         return RedirectToPage("./Index");
     }
