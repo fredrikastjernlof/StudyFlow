@@ -82,6 +82,10 @@
         max-width: 100%;
         min-height: 85px;
         padding: 1.25rem;
+
+        &--pinned {
+            padding-top: 2.5rem;
+        }
     }
 }
 

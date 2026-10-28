@@ -2325,6 +2325,9 @@ main:is(:has(#account), :has(#registerForm)) #registerForm p {
     min-height: 85px;
     padding: 1.25rem;
   }
+  .empty-state-note--pinned {
+    padding-top: 2.5rem;
+  }
 }
 .dashboard-book .empty-state-note,
 .course-details-page .empty-state-note {
