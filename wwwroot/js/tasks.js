@@ -97,8 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
             row.innerHTML = `
                 <input type="text" name="newItemTitles"
                 maxlength="100" aria-label="New checklist item" />
-                <button type="button" class="remove-checklist-row">Remove</button>
-`;
+                <button type="button" class="remove-checklist-row">Remove</button>`;
 
             container.appendChild(row);
         });
@@ -139,10 +138,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!response.ok) throw new Error("Failed to save status.");
 
                 savedStatus = select.value;
+
+                const taskId = form.querySelector('input[name="taskId"]').value;
+                sessionStorage.setItem("reopenTaskDialog", taskId);
+
+                window.location.reload();
+
             } catch (error) {
                 console.error(error);
                 select.value = savedStatus;
-                alert("Kunde inte spara statusen.");
+                alert("Failed to save task status.");
             } finally {
                 select.disabled = false;
             }
@@ -216,10 +221,20 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.error(error);
                 matchingCheckboxes.forEach(item => item.checked = !isCompleted);
-                alert("Kunde inte spara delmomentet.");
+                alert("Failed to save checklist item.");
             } finally {
                 matchingCheckboxes.forEach(item => item.disabled = false);
             }
         });
     });
+
+    // Reopen the task details dialog after a status update.
+    const reopenTaskId = sessionStorage.getItem("reopenTaskDialog");
+
+    if (reopenTaskId) {
+        sessionStorage.removeItem("reopenTaskDialog");
+
+        const taskDialog = document.getElementById(`taskDialog-${reopenTaskId}`);
+        taskDialog?.showModal();
+    }
 });

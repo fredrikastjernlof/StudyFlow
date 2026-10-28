@@ -1,7 +1,7 @@
 
 "use strict";
 
-// Add and remove checklist fields using the shared form validation.
+// Manage dynamic checklist fields.
 const newChecklistContainer = document.querySelector(".new-checklist-items");
 
 if (newChecklistContainer) {
@@ -53,7 +53,7 @@ if (newChecklistContainer) {
     });
 }
 
-// Validate task forms before posting. Native POST remains unchanged.
+// Validate task forms before submission.
 function validateTaskForm(form, edit, requireNamedChecklist = false) {
     const field = name => form.elements.namedItem(edit ? name : `TaskInput.${name.charAt(0).toUpperCase()}${name.slice(1)}`);
     const errors = {};
@@ -93,8 +93,10 @@ function validateTaskForm(form, edit, requireNamedChecklist = false) {
 
         if (checklistInputs.some(input => input.value.trim().length > 100)) {
             errors.checklistItems = "Checklist items must not exceed 100 characters.";
-        } else if (requireNamedChecklist && checklistInputs.some(input => !input.value.trim())) {
-            errors.checklistItems = "Complete the checklist item before adding another.";
+        } else if (checklistInputs.some(input => !input.value.trim())) {
+            errors.checklistItems = requireNamedChecklist
+                ? "Complete the checklist item before adding another."
+                : "Checklist items must contain 1–100 characters.";
         }
     }
 
@@ -123,7 +125,7 @@ function validateTaskForm(form, edit, requireNamedChecklist = false) {
         const invalid = edit
             ? (!input.value.trim() || input.value.trim().length > 100)
             : Boolean(errors.checklistItems) &&
-              (!input.value.trim() || input.value.trim().length > 100);
+            (!input.value.trim() || input.value.trim().length > 100);
 
         input.classList.toggle("is-invalid", invalid);
 

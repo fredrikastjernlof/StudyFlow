@@ -61,10 +61,16 @@ document.querySelectorAll(".task-status-select").forEach(select => {
             }
 
             savedStatus = select.value;
+
+            const taskId = form.querySelector('input[name="taskId"]').value;
+            sessionStorage.setItem("reopenTaskDialog", taskId);
+
+            window.location.reload();
+
         } catch (error) {
             console.error(error);
             select.value = savedStatus;
-            alert("Kunde inte spara statusen.");
+            alert("Failed to save task status.");
         } finally {
             select.disabled = false;
         }
@@ -154,7 +160,7 @@ document.querySelectorAll(".checklist-checkbox").forEach(checkbox => {
                 item.checked = !isCompleted;
             });
 
-            alert("Kunde inte spara delmomentet.");
+            alert("Failed to save checklist item.");
         } finally {
             matchingCheckboxes.forEach(item => {
                 item.disabled = false;
@@ -184,7 +190,7 @@ document.querySelectorAll(".add-checklist-row").forEach(button => {
             .find(input => !input.value.trim());
         if (empty) {
             const form = button.closest("form");
-            updateValidationSummary(form, { checklist: "Fyll i delmomentet innan du lägger till ett nytt." });
+            updateValidationSummary(form, { checklist: "Complete the checklist item before adding another." });
             empty.focus();
             return;
         }
@@ -193,9 +199,9 @@ document.querySelectorAll(".add-checklist-row").forEach(button => {
 
         row.innerHTML = `
             <input type="text" name="newItemTitles"
-                   maxlength="100" aria-label="Nytt delmoment" />
+                   maxlength="100" aria-label="New checklist item" />
             <button type="button" class="remove-checklist-row">
-                Ta bort
+                Remove
             </button>
         `;
 
@@ -257,11 +263,21 @@ courseForm.addEventListener("submit", event => {
     const color = courseForm.elements.namedItem("CourseColor");
     const nameError = courseForm.querySelector('[data-valmsg-for="CourseName"]');
     const colorError = courseForm.querySelector('[data-valmsg-for="CourseColor"]');
-    nameError.textContent = !name.value.trim() ? "Du måste ange ett kursnamn."
-        : name.value.trim().length > 100 ? "Kursnamnet får innehålla högst 100 tecken." : "";
-    colorError.textContent = /^#[0-9a-fA-F]{6}$/.test(color.value) ? "" : "Ogiltig färgkod.";
+    nameError.textContent = !name.value.trim() ? "You must enter a course name."
+        : name.value.trim().length > 100 ? "The course name cannot exceed 100 characters." : "";
+    colorError.textContent = /^#[0-9a-fA-F]{6}$/.test(color.value) ? "" : "Invalid color code.";
     if (nameError.textContent || colorError.textContent) event.preventDefault();
 });
 courseForm.addEventListener("input", () => {
     courseForm.querySelectorAll('[data-valmsg-for]').forEach(x => x.textContent = "");
 });
+
+// Reopen the task details dialog after a status update.
+const reopenTaskId = sessionStorage.getItem("reopenTaskDialog");
+
+if (reopenTaskId) {
+    sessionStorage.removeItem("reopenTaskDialog");
+
+    const taskDialog = document.getElementById(`taskDialog-${reopenTaskId}`);
+    taskDialog?.showModal();
+}
