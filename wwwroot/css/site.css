@@ -2095,6 +2095,138 @@ main:is(:has(#account), :has(#registerForm)) #registerForm p {
   margin-bottom: 1rem;
 }
 
+.welcome-page {
+  padding: 2rem 1rem 4rem;
+}
+.welcome-page .welcome-board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 920px;
+  min-height: 460px;
+  margin: 0 auto;
+  padding: 2.5rem;
+}
+.welcome-page .welcome-note {
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+  padding: 3.5rem 2.5rem 3rem;
+  background-color: var(--color-paper);
+  color: var(--color-text);
+  box-shadow: 3px 7px 15px rgba(55, 38, 35, 0.25);
+  text-align: center;
+  transform: rotate(-2deg);
+}
+.welcome-page .welcome-note::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffb6b6, #d94b65 65%, #8b2439);
+  box-shadow: 1px 2px 3px rgba(55, 38, 35, 0.5), inset -2px -2px 3px rgba(55, 38, 35, 0.25);
+}
+.welcome-page .welcome-note h1 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  line-height: 1.2;
+}
+.welcome-page .welcome-note p {
+  max-width: 390px;
+  margin: 0 auto 2rem;
+  line-height: 1.7;
+}
+.welcome-page .welcome-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.welcome-page .welcome-actions a {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 145px;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.welcome-page .welcome-actions a:focus-visible {
+  outline: 3px solid var(--color-text);
+  outline-offset: 3px;
+}
+.welcome-page .welcome-actions .welcome-login {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+.welcome-page .welcome-actions .welcome-login:hover {
+  background-color: #4f7356;
+  transform: translateY(-2px);
+}
+.welcome-page .welcome-actions .welcome-register {
+  background-color: #fff;
+  color: #4f7356;
+}
+.welcome-page .welcome-actions .welcome-register:hover {
+  background-color: #e9f1e9;
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .welcome-page .welcome-note {
+    animation: welcome-note-sway 1.2s ease-out both;
+    transform-origin: 50% 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome-page .welcome-actions a {
+    transition: none;
+  }
+}
+@media (max-width: 576px) {
+  .welcome-page {
+    padding: 1.5rem 0.5rem 3rem;
+  }
+  .welcome-page .welcome-board {
+    min-height: 380px;
+    padding: 1.25rem;
+  }
+  .welcome-page .welcome-note {
+    padding: 3rem 1.25rem 2rem;
+  }
+  .welcome-page .welcome-actions {
+    gap: 0.75rem;
+  }
+  .welcome-page .welcome-actions a {
+    min-width: 125px;
+    padding: 0.65rem 1rem;
+  }
+}
+
+@keyframes welcome-note-sway {
+  0% {
+    transform: rotate(-5deg);
+  }
+  35% {
+    transform: rotate(1deg);
+  }
+  65% {
+    transform: rotate(-3deg);
+  }
+  85% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(-2deg);
+  }
+}
 :root {
   --color-background: #fff1f1;
   --color-paper: #fffbe6;

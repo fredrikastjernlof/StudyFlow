@@ -123,28 +123,36 @@
 }
 else
 {
-    <main class="welcome-page">
+    
+<main class="welcome-page">
+    <div class="bulletin-board welcome-board">
 
-        <h1>Welcome to StudyFlow!</h1>
+        <section class="welcome-note" aria-labelledby="welcome-heading">
+            <h1 id="welcome-heading">Welcome to StudyFlow!</h1>
 
-        <p>
-            Plan your studies, organize your tasks
-            and keep track of your progress – all in one place.
-        </p>
+            <p>
+                Plan your studies, organize your tasks
+                and keep track of your progress – all in one place.
+            </p>
 
-        <div class="welcome-actions">
-            <a asp-area="Identity"
-               asp-page="/Account/Login">
-                Log in
-            </a>
+            <div class="welcome-actions">
+                <a class="welcome-login"
+                   asp-area="Identity"
+                   asp-page="/Account/Login">
+                    Log in
+                </a>
 
-            <a asp-area="Identity"
-               asp-page="/Account/Register">
-                Create account
-            </a>
-        </div>
+                <a class="welcome-register"
+                   asp-area="Identity"
+                   asp-page="/Account/Register">
+                    Create account
+                </a>
+            </div>
+        </section>
 
-    </main>
+    </div>
+</main>
+
 }
 
 @if (User.Identity?.IsAuthenticated == true)
