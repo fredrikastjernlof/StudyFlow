@@ -133,10 +133,12 @@
             }
             else
             {
-                <p>No tasks to focus on right now.</p>
+                <p class="empty-state-note empty-state-note--pink">
+                    No tasks to focus on right now.
+                </p>
             }
 
-            <section aria-labelledby="next-up-heading">
+            <section class="course-next-up" aria-labelledby="next-up-heading">
                 <h2 id="next-up-heading">Next up</h2>
 
                 @{
@@ -158,7 +160,9 @@
                 }
                 else
                 {
-                    <p>No upcoming tasks to show.</p>
+                    <p class="empty-state-note empty-state-note--lavender">
+                        No upcoming tasks to show.
+                    </p>
                 }
             </section>
 

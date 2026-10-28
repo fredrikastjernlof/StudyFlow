@@ -15,6 +15,7 @@
 @use "components/create-task-form";
 @use "pages/identity";
 @use "pages/welcome";
+@use "components/empty-states";
 
 :root {
   --color-background: #{vars.$color-background};

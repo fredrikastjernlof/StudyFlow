@@ -35,7 +35,7 @@
                     }
                     else
                     {
-                        <p class="board-empty-message">
+                        <p class="empty-state-note empty-state-note--pink">
                             No tasks to prioritize right now.
                         </p>
                     }
@@ -82,7 +82,7 @@
                     }
                     else
                     {
-                        <p class="board-empty-message">
+                        <p class="empty-state-note empty-state-note--pink">
                             No upcoming tasks.
                         </p>
                     }
@@ -107,7 +107,9 @@
                     }
                     else
                     {
-                        <p>You haven't added any courses yet.</p>
+                        <p class="empty-state-note empty-state-note--mint">
+                            You haven't added any courses yet.
+                        </p>
                     }
 
                     <a asp-page="/Courses/Index" class="dashboard-courses-link">

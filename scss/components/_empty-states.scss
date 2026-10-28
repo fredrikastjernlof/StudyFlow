@@ -1,0 +1,92 @@
+.empty-state-note {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    max-width: min(100%, 320px);
+    min-height: 100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    box-sizing: border-box;
+
+    background-color: #f9dce5;
+    color: var(--color-text);
+    box-shadow: 3px 5px 10px rgb(55 38 35 / 18%);
+
+    text-align: center;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    transform: rotate(-1deg);
+
+    &--pink {
+        background-color: #f9dce5;
+    }
+
+    &--mint {
+        background-color: #d9f2df;
+        transform: rotate(1deg);
+    }
+
+    &--lavender {
+        background-color: #e7dcfc;
+        transform: rotate(1deg);
+    }
+
+    &--yellow {
+        background-color: #fff0bc;
+    }
+
+    &--pinned {
+        min-height: 160px;
+        max-width: 300px;
+        padding: 2.5rem 1.5rem 1.5rem;
+        background-color: #fff9e5;
+        transform: rotate(-2deg);
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle at 35% 30%,
+                    #ffb9c7,
+                    #d94b65 65%,
+                    #8b2439);
+            box-shadow: 1px 2px 3px rgb(55 38 35 / 35%);
+        }
+    }
+}
+
+// Keep notes centered on bulletin boards and book pages.
+.tasks-board-section,
+.dashboard-courses,
+.course-details-page .dashboard-book-page {
+    .empty-state-note {
+        margin-inline: auto;
+    }
+}
+
+.courses-page>.bulletin-board:has(> .empty-state-note) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .empty-state-note {
+        max-width: 100%;
+        min-height: 85px;
+        padding: 1.25rem;
+    }
+}
+
+// Add spacing after empty-state notes on book pages.
+.dashboard-book .empty-state-note,
+.course-details-page .empty-state-note {
+    margin-bottom: 4rem;
+}

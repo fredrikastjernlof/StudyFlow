@@ -99,7 +99,6 @@
     }
   }
 
-
   .course-details-header {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -128,6 +127,9 @@
     }
   }
 
+  .course-next-up {
+    margin-top: 3rem;
+  }
 
   @media (max-width: 768px) {
     .course-details-header {

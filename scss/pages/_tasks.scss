@@ -220,6 +220,16 @@
     margin: 0;
     list-style: none;
 
+    &:has(> :only-child) {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+
+        >* {
+            width: 100%;
+            max-width: 260px;
+        }
+    }
+
     @media (max-width: 768px) {
         grid-template-columns: 1fr;
     }

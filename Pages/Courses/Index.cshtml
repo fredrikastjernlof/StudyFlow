@@ -21,7 +21,9 @@
     <section class="bulletin-board" aria-label="My courses">
         @if (Model.Courses.Count == 0)
         {
-            <p>You haven't added any courses yet.</p>
+            <p class="empty-state-note empty-state-note--pinned">
+                You haven't added any courses yet.
+            </p>
         }
         else
         {

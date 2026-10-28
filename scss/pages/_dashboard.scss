@@ -164,6 +164,16 @@
             width: 100%;
             max-width: 600px;
             margin-inline: auto;
+
+            &:has(> :only-child) {
+                grid-template-columns: minmax(0, 1fr);
+                justify-items: center;
+
+                >* {
+                    width: 100%;
+                    max-width: 260px;
+                }
+            }
         }
     }
 
@@ -202,6 +212,16 @@
     gap: 1.5rem;
     padding: 0;
     list-style: none;
+
+    &:has(> :only-child) {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+
+        >* {
+            width: 100%;
+            max-width: 220px;
+        }
+    }
 
     .course-card {
         aspect-ratio: 1;
