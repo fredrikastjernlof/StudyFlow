@@ -1862,6 +1862,211 @@ select.is-invalid:focus-visible {
     gap: 1rem;
   }
 }
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) {
+  max-width: 1000px;
+  margin-inline: auto;
+  padding-block: 2rem 4rem;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) > h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) h2 {
+  margin-bottom: 1rem;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) h3 {
+  margin-bottom: 1.5rem;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) hr {
+  margin-bottom: 2rem;
+  opacity: 0.2;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .nav-pills {
+  gap: 0.5rem;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .nav-pills .nav-link {
+  color: var(--color-text);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .nav-pills .nav-link:hover {
+  background-color: var(--color-paper);
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .nav-pills .nav-link.active {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 700;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .form-control {
+  border-radius: 8px;
+  border: 1px solid var(--color-text);
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .form-control:focus {
+  border-color: var(--color-text);
+  box-shadow: none;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-text);
+  color: var(--color-text);
+  font-weight: 700;
+}
+main:is(:has(#profile-form),
+:has(#email-form),
+:has(#change-password-form),
+:has(#two-factor-authentication),
+:has(#personal-data)) .btn-primary:hover {
+  background-color: var(--color-text);
+  color: var(--color-paper);
+}
+@media (min-width: 990px) {
+  main:is(:has(#profile-form),
+  :has(#email-form),
+  :has(#change-password-form),
+  :has(#two-factor-authentication),
+  :has(#personal-data)) .col-lg-9 {
+    padding-left: 3.5rem;
+  }
+}
+@media (max-width: 990px) {
+  main:is(:has(#profile-form),
+  :has(#email-form),
+  :has(#change-password-form),
+  :has(#two-factor-authentication),
+  :has(#personal-data)) .col-lg-9 {
+    margin-top: 2rem;
+  }
+}
+
+.col-md-6:has(#download-data) #download-data,
+.col-md-6:has(#download-data) > p:has(#delete) {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+}
+.col-md-6:has(#download-data) > p:has(#delete) {
+  margin-left: 0.5rem;
+}
+
+main:is(:has(#account), :has(#registerForm)) {
+  max-width: 1000px;
+  margin-inline: auto;
+  padding-block: 2rem 4rem;
+}
+main:is(:has(#account), :has(#registerForm)) > h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+main:is(:has(#account), :has(#registerForm)) > .row {
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+}
+main:is(:has(#account), :has(#registerForm)) .col-lg-6 {
+  width: 100%;
+  max-width: 420px;
+}
+main:is(:has(#account), :has(#registerForm)) #account h2,
+main:is(:has(#account), :has(#registerForm)) #registerForm h2 {
+  margin-bottom: 1rem;
+}
+main:is(:has(#account), :has(#registerForm)) #account hr,
+main:is(:has(#account), :has(#registerForm)) #registerForm hr {
+  margin-bottom: 2rem;
+  opacity: 0.2;
+}
+main:is(:has(#account), :has(#registerForm)) #account .form-control,
+main:is(:has(#account), :has(#registerForm)) #registerForm .form-control {
+  border-radius: 8px;
+  border: 1px solid var(--color-text);
+}
+main:is(:has(#account), :has(#registerForm)) #account .form-control:focus,
+main:is(:has(#account), :has(#registerForm)) #registerForm .form-control:focus {
+  border-color: var(--color-text);
+  box-shadow: none;
+}
+main:is(:has(#account), :has(#registerForm)) #account .btn-primary,
+main:is(:has(#account), :has(#registerForm)) #registerForm .btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-text);
+  color: var(--color-text);
+  font-weight: 700;
+}
+main:is(:has(#account), :has(#registerForm)) #account .btn-primary:hover,
+main:is(:has(#account), :has(#registerForm)) #registerForm .btn-primary:hover {
+  background-color: var(--color-text);
+  color: var(--color-paper);
+}
+main:is(:has(#account), :has(#registerForm)) #account a,
+main:is(:has(#account), :has(#registerForm)) #registerForm a {
+  color: var(--color-text);
+}
+main:is(:has(#account), :has(#registerForm)) #account a:hover,
+main:is(:has(#account), :has(#registerForm)) #registerForm a:hover {
+  text-decoration: none;
+}
+main:is(:has(#account), :has(#registerForm)) .col-lg-4 {
+  width: 100%;
+  max-width: 420px;
+  margin-left: 0;
+}
+main:is(:has(#account), :has(#registerForm)) #login-submit,
+main:is(:has(#account), :has(#registerForm)) #registerSubmit {
+  margin-bottom: 1.5rem;
+}
+main:is(:has(#account), :has(#registerForm)) #account p,
+main:is(:has(#account), :has(#registerForm)) #registerForm p {
+  margin-bottom: 1rem;
+}
+
 :root {
   --color-background: #fff1f1;
   --color-paper: #fffbe6;

@@ -1,0 +1,185 @@
+// ASP.NET Core Identity – account settings
+main:is( :has(#profile-form),
+    :has(#email-form),
+    :has(#change-password-form),
+    :has(#two-factor-authentication),
+    :has(#personal-data)) {
+    max-width: 1000px;
+    margin-inline: auto;
+    padding-block: 2rem 4rem;
+
+    >h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    h2 {
+        margin-bottom: 1rem;
+    }
+
+    h3 {
+        margin-bottom: 1.5rem;
+    }
+
+    hr {
+        margin-bottom: 2rem;
+        opacity: 0.2;
+    }
+
+
+    // Settings navigation
+    .nav-pills {
+        gap: 0.5rem;
+
+        .nav-link {
+            color: var(--color-text);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+
+            &:hover {
+                background-color: var(--color-paper);
+            }
+
+            &.active {
+                background-color: var(--color-primary);
+
+                color: var(--color-text);
+                font-weight: 700;
+            }
+        }
+    }
+
+    // Form fields
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid var(--color-text);
+
+        &:focus {
+            border-color: var(--color-text);
+            box-shadow: none;
+        }
+    }
+
+    // Save button
+    .btn-primary {
+        background-color: var(--color-primary);
+        border-color: var(--color-text);
+        color: var(--color-text);
+        font-weight: 700;
+
+        &:hover {
+            background-color: var(--color-text);
+            color: var(--color-paper);
+        }
+    }
+
+    // Spacing between settings menu and content
+    @media (min-width: 990px) {
+        .col-lg-9 {
+            padding-left: 3.5rem;
+        }
+    }
+
+    @media (max-width: 990px) {
+        .col-lg-9 {
+            margin-top: 2rem;
+        }
+    }
+}
+
+// Personal data – buttons
+.col-md-6:has(#download-data) {
+
+    #download-data,
+    >p:has(#delete) {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 0;
+    }
+
+    >p:has(#delete) {
+        margin-left: 0.5rem;
+    }
+}
+
+// Log in & Register.
+main:is(:has(#account), :has(#registerForm)) {
+    max-width: 1000px;
+    margin-inline: auto;
+    padding-block: 2rem 4rem;
+
+    >h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    >.row {
+        flex-direction: column;
+        align-items: center;
+        gap: 3rem;
+    }
+
+    .col-lg-6 {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    #account,
+    #registerForm {
+        h2 {
+            margin-bottom: 1rem;
+        }
+
+        hr {
+            margin-bottom: 2rem;
+            opacity: 0.2;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid var(--color-text);
+
+            &:focus {
+                border-color: var(--color-text);
+                box-shadow: none;
+            }
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-text);
+            color: var(--color-text);
+            font-weight: 700;
+
+            &:hover {
+                background-color: var(--color-text);
+                color: var(--color-paper);
+            }
+        }
+
+        a {
+            color: var(--color-text);
+
+            &:hover {
+                text-decoration: none;
+            }
+        }
+    }
+
+
+    .col-lg-4 {
+        width: 100%;
+        max-width: 420px;
+        margin-left: 0;
+    }
+
+    #login-submit,
+    #registerSubmit {
+        margin-bottom: 1.5rem;
+    }
+
+    #account p,
+    #registerForm p {
+        margin-bottom: 1rem;
+    }
+}

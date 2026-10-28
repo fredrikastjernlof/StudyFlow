@@ -13,6 +13,7 @@
 @use "components/course-card";
 @use "pages/tasks";
 @use "components/create-task-form";
+@use "pages/identity";
 
 :root {
   --color-background: #{vars.$color-background};
