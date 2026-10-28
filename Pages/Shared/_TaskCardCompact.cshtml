@@ -1,5 +1,4 @@
-
-@* Compact task card used in the Next up section. *@
+@* Compact task card used in task lists. *@
 @model StudyFlow.Models.StudyTask
 
 @{
@@ -20,7 +19,7 @@
         }
         else
         {
-            <span class="task-course-name">Fristående uppgift</span>
+            <span class="task-course-name">Standalone task</span>
         }
 
         @if (!string.IsNullOrWhiteSpace(task.Description))

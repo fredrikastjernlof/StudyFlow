@@ -113,20 +113,14 @@
 
         <h3>My checklist</h3>
 
-        <label for="newChecklistItem">Add checklist items (optional)</label>
-
         <div class="new-checklist-items">
-            <div class="new-checklist-row">
-                <input type="text" id="newChecklistItem" name="checklistItems" placeholder="Checklist item 1"
-                       maxlength="100" autocomplete="off" />
-            </div>
 
             @if (ViewData["PostedChecklistItems"] is List<string> postedItems)
             {
                 @foreach (var postedItem in postedItems)
                 {
                     <div class="new-checklist-row">
-                        <input type="text" name="checklistItems" value="@postedItem" maxlength="100" />
+                        <input type="text" name="checklistItems" value="@postedItem" maxlength="100" autocomplete="off" />
 
                         <button type="button" class="remove-new-checklist-item">
                             Remove

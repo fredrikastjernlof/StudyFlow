@@ -6,7 +6,7 @@
 }
 
 <main class="course-details-page"
-      data-course-name-error="@(ViewData.ModelState.ContainsKey("CourseName") && ViewData.ModelState["CourseName"]!.Errors.Count > 0)"
+      data-course-name-error="@(ViewData.ModelState.ContainsKey("CourseName") && ViewData.ModelState["CourseName"]!.Errors.Count > 0 || ViewData.ModelState.ContainsKey("CourseColor") && ViewData.ModelState["CourseColor"]!.Errors.Count > 0)"
       data-task-input-error="@(!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("TaskInput.") || k == "checklistItems"))">
 
     <a asp-page="./Index" class="back-to-courses">

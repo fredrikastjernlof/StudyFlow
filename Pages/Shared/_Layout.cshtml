@@ -5,13 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - StudyFlow</title>
-    <script type="importmap"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/StudyFlow.styles.css" asp-append-version="true" />
 </head>
 
 <body>
@@ -22,7 +20,7 @@
                 <a class="navbar-brand" asp-page="/Index">StudyFlow</a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation"
-                        aria-controls="mainNavigation" aria-expanded="false" aria-label="Visa meny">
+                        aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -88,8 +86,7 @@
                 </footer>
 
                 <script src="~/lib/jquery/dist/jquery.min.js"></script>
-                <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-                <script src="~/js/site.js" asp-append-version="true"></script>
+                <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> 
 
                 @await RenderSectionAsync("Scripts", required: false)
                 <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>

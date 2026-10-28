@@ -1,11 +1,10 @@
-﻿
-@page
+﻿@page
 @model IndexModel
 
 @{
     ViewData["Title"] = User.Identity?.IsAuthenticated == true
         ? "Dashboard"
-        : "Välkommen till StudyFlow";
+        : "Welcome to StudyFlow";
 }
 
 @if (User.Identity?.IsAuthenticated == true)
@@ -108,7 +107,7 @@
                     }
                     else
                     {
-                        <p>Du har inte lagt till några kurser ännu.</p>
+                        <p>You haven't added any courses yet.</p>
                     }
 
                     <a asp-page="/Courses/Index" class="dashboard-courses-link">
@@ -126,22 +125,22 @@ else
 {
     <main class="welcome-page">
 
-        <h1>Välkommen till StudyFlow!</h1>
+        <h1>Welcome to StudyFlow!</h1>
 
         <p>
-            Planera dina studier, organisera dina uppgifter
-            och håll koll på dina framsteg – allt på ett ställe.
+            Plan your studies, organize your tasks
+            and keep track of your progress – all in one place.
         </p>
 
         <div class="welcome-actions">
             <a asp-area="Identity"
                asp-page="/Account/Login">
-                Logga in
+                Log in
             </a>
 
             <a asp-area="Identity"
                asp-page="/Account/Register">
-                Skapa konto
+                Create account
             </a>
         </div>
 
