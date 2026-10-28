@@ -1,6 +1,11 @@
 button:not(.logout-btn, .navbar-toggler, .task-dialog-close),
 .btn:not(.logout-btn, .navbar-toggler, .task-dialog-close) {
   box-shadow: 0 3px 8px rgb(55 38 35 / 90%);
+
+  &:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 3px;
+  }
 }
 
 // ADD COURSE / ADD TASK

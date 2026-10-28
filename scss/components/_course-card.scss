@@ -19,6 +19,8 @@
         position: relative;
         display: flex;
         align-items: center;
+        flex-direction: column;
+        gap: 0.5rem;
         justify-content: center;
         width: 100%;
         min-height: 200px;
@@ -31,8 +33,7 @@
             3px 5px 8px rgb(55 38 35 / 30%),
             8px 12px 18px rgb(55 38 35 / 20%);
 
-        flex-direction: column;
-        gap: 0.5rem;
+        
 
         .course-card-arrow {
             width: 85px;

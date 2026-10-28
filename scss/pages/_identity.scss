@@ -1,9 +1,11 @@
 // ASP.NET Core Identity – account settings
-main:is( :has(#profile-form),
+main:is(
+    :has(#profile-form),
     :has(#email-form),
     :has(#change-password-form),
     :has(#two-factor-authentication),
-    :has(#personal-data)) {
+    :has(#personal-data)
+) {
     max-width: 1000px;
     margin-inline: auto;
     padding-block: 2rem 4rem;
@@ -58,6 +60,11 @@ main:is( :has(#profile-form),
             border-color: var(--color-text);
             box-shadow: none;
         }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-text);
+            outline-offset: 2px;
+        }
     }
 
     // Save button
@@ -74,13 +81,13 @@ main:is( :has(#profile-form),
     }
 
     // Spacing between settings menu and content
-    @media (min-width: 990px) {
+    @media (min-width: 992px) {
         .col-lg-9 {
             padding-left: 3.5rem;
         }
     }
 
-    @media (max-width: 990px) {
+    @media (max-width: 991.98px) {
         .col-lg-9 {
             margin-top: 2rem;
         }
@@ -142,6 +149,11 @@ main:is(:has(#account), :has(#registerForm)) {
             &:focus {
                 border-color: var(--color-text);
                 box-shadow: none;
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--color-text);
+                outline-offset: 2px;
             }
         }
 

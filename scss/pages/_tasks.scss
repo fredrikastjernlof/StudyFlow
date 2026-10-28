@@ -474,3 +474,11 @@
         transform: rotate(1.5deg);
     }
 }
+
+@media (prefers-reduced-motion: reduce) {
+
+    #completed-tasks:target .board-note-heading,
+    #completed-tasks:target .task-card-compact {
+        animation: none;
+    }
+}

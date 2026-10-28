@@ -25,6 +25,12 @@
         &:hover {
             text-decoration: underline;
         }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-text);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
     }
 }
 
@@ -52,5 +58,3 @@
         outline-offset: 3px;
     }
 }
-
-

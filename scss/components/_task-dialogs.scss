@@ -85,6 +85,11 @@
         color: var(--color-text);
         font-weight: 600;
         cursor: pointer;
+
+        &:focus-visible {
+            outline: 2px solid var(--color-text);
+            outline-offset: 3px;
+        }
     }
 
     .task-dialog-priority {
@@ -268,11 +273,18 @@
         &:hover {
             transform: scale(1.1);
         }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-text);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
     }
 
     h2 {
         margin: 0 0 1.5rem;
         font-size: 2.5rem;
+        padding-right: 1.5rem;
     }
 
     // Reuse the Add task form styling.
@@ -409,10 +421,6 @@
         textarea {
             resize: vertical;
         }
-    }
-
-    h2 {
-        padding-right: 1.5rem;
     }
 
     .edit-task-checklist {
@@ -567,6 +575,12 @@
 
         &:hover {
             opacity: 0.7;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-text);
+            outline-offset: 3px;
+            border-radius: 4px;
         }
     }
 }
