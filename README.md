@@ -126,3 +126,12 @@ En av de större utmaningarna har varit att sätta mig in i Razor Pages och hur 
 Det jag framför allt tar med mig är en bättre förståelse för hur man bygger upp en applikation från grunden, och hur viktigt det är att tänka på både funktionalitet, kodstruktur och användarupplevelse.
 
 StudyFlow är utvecklat för lokal körning och har inte publicerats på någon extern webbserver.
+
+---
+
+## 📄 Rapport och presentation
+
+Som en del av slutprojektet har jag skrivit en projektrapport och spelat in en videopresentation där jag visar StudyFlows funktioner och berättar kort om utvecklingsarbetet.
+
+- 📑 [Läs projektrapporten](Projektrapport.pdf)
+- 🎬 [Se videopresentationen på YouTube](https://youtu.be/X2FZgDY0erg)
