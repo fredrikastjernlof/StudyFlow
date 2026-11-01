@@ -1,0 +1,74 @@
+StudyFlow – Förenklad projektstruktur
+
+Översikten visar de filer och mappar som är mest relevanta
+för applikationens uppbyggnad. Genererade filer, externa
+bibliotek och övriga standardfiler har utelämnats.
+
+StudyFlow/
+├── Data/
+│   └── ApplicationDbContext.cs
+├── Models/
+│   ├── ChecklistItem.cs
+│   ├── Course.cs
+│   └── StudyTask.cs
+├── Pages/
+│   ├── Courses/
+│   │   ├── Details.cshtml
+│   │   ├── Details.cshtml.cs
+│   │   ├── Index.cshtml
+│   │   └── Index.cshtml.cs
+│   ├── Tasks/
+│   │   ├── Index.cshtml
+│   │   └── Index.cshtml.cs
+│   ├── Shared/
+│   │   ├── _CourseCard.cshtml
+│   │   ├── _CreateTaskForm.cshtml
+│   │   ├── _DeleteTaskDialog.cshtml
+│   │   ├── _EditTaskDialog.cshtml
+│   │   ├── _Layout.cshtml
+│   │   ├── _LoginPartial.cshtml
+│   │   ├── _TaskCard.cshtml
+│   │   ├── _TaskCardCompact.cshtml
+│   │   └── _TaskDetailsDialog.cshtml
+│   ├── Index.cshtml
+│   └── Index.cshtml.cs
+├── Services/
+│   ├── ChecklistService.cs
+│   ├── CourseService.cs
+│   ├── TaskPriorityService.cs
+│   └── TaskService.cs
+├── ViewModels/
+│   ├── StudyTaskInputModel.cs
+│   └── TaskPriorityResult.cs
+├── scss/
+│   ├── abstracts/
+│   │   └── _variables.scss
+│   ├── base/
+│   │   └── _typography.scss
+│   ├── components/
+│   │   ├── _bulletin-board.scss
+│   │   ├── _buttons.scss
+│   │   ├── _course-card.scss
+│   │   ├── _course-dialogs.scss
+│   │   ├── _create-task-form.scss
+│   │   ├── _dialogs.scss
+│   │   ├── _empty-states.scss
+│   │   └── _task-dialogs.scss
+│   ├── layout/
+│   │   ├── _footer.scss
+│   │   ├── _header.scss
+│   │   └── _responsive.scss
+│   ├── pages/
+│   │   ├── _courses.scss
+│   │   ├── _dashboard.scss
+│   │   ├── _identity.scss
+│   │   ├── _tasks.scss
+│   │   └── _welcome.scss
+│   └── main.scss
+├── wwwroot/
+│   └── js/
+│       ├── course-details.js
+│       ├── courses.js
+│       ├── task-form-validation.js
+│       └── tasks.js
+└── Program.cs
