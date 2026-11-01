@@ -199,6 +199,11 @@ public class IndexModel : PageModel
 
         if (!updated) return NotFound();
 
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return new JsonResult(new { success = true, status });
+        }
+
         return RedirectToPage("./Index");
     }
 

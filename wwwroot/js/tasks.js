@@ -28,49 +28,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Open task details.
-    document.querySelectorAll(".task-details-button").forEach(button => {
-        button.addEventListener("click", () => {
-            document.getElementById(
-                `taskDialog-${button.dataset.taskId}`
-            )?.showModal();
-        });
+    document.addEventListener("click", event => {
+        const button = event.target.closest(".task-details-button");
+        if (!button) return;
+
+        document.getElementById(
+            `taskDialog-${button.dataset.taskId}`
+        )?.showModal();
     });
 
-    // Close task details.
-    document.querySelectorAll(".close-task-dialog").forEach(button => {
-        button.addEventListener("click", () => {
+    // Handle task dialog actions.
+    document.addEventListener("click", event => {
+        const button = event.target.closest(
+            ".close-task-dialog, " +
+            ".open-edit-task-dialog, " +
+            ".close-edit-task-dialog, " +
+            ".open-delete-task-dialog, " +
+            ".cancel-delete-task"
+        );
+
+        if (!button) return;
+
+        if (button.matches(".close-task-dialog, .close-edit-task-dialog, .cancel-delete-task")) {
             button.closest("dialog")?.close();
-        });
-    });
+            return;
+        }
 
-    // Open task editor.
-    document.querySelectorAll(".open-edit-task-dialog").forEach(button => {
-        button.addEventListener("click", () => {
-            const taskId = button.dataset.taskId;
+        const taskId = button.dataset.taskId;
+
+        if (button.matches(".open-edit-task-dialog")) {
             document.getElementById(`taskDialog-${taskId}`)?.close();
             document.getElementById(`editTaskDialog-${taskId}`)?.showModal();
-        });
-    });
+        }
 
-    document.querySelectorAll(".close-edit-task-dialog").forEach(button => {
-        button.addEventListener("click", () => {
-            button.closest("dialog")?.close();
-        });
-    });
-
-    // Open delete confirmation.
-    document.querySelectorAll(".open-delete-task-dialog").forEach(button => {
-        button.addEventListener("click", () => {
-            const taskId = button.dataset.taskId;
+        if (button.matches(".open-delete-task-dialog")) {
             document.getElementById(`taskDialog-${taskId}`)?.close();
             document.getElementById(`deleteTaskDialog-${taskId}`)?.showModal();
-        });
-    });
-
-    document.querySelectorAll(".cancel-delete-task").forEach(button => {
-        button.addEventListener("click", () => {
-            button.closest("dialog")?.close();
-        });
+        }
     });
 
     // Add checklist fields when editing.
@@ -118,114 +112,218 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Save status without a page reload.
-    document.querySelectorAll(".task-status-select").forEach(select => {
-        let savedStatus = select.value;
+    // Remember the current status before it changes.
+    document.addEventListener("focusin", event => {
+        const select = event.target;
 
-        select.addEventListener("change", async () => {
-            const form = select.closest("form");
-            if (!form) return;
-
-            const formData = new FormData(form);
-            select.disabled = true;
-
-            try {
-                const response = await fetch(form.action, {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error("Failed to save status.");
-
-                savedStatus = select.value;
-
-                const taskId = form.querySelector('input[name="taskId"]').value;
-                sessionStorage.setItem("reopenTaskDialog", taskId);
-
-                window.location.reload();
-
-            } catch (error) {
-                console.error(error);
-                select.value = savedStatus;
-                alert("Failed to save task status.");
-            } finally {
-                select.disabled = false;
-            }
-        });
+        if (select.matches(".task-status-select")) {
+            select.dataset.savedStatus = select.value;
+        }
     });
 
-    // Save checklist changes and synchronize progress.
-    document.querySelectorAll(".checklist-checkbox").forEach(checkbox => {
-        checkbox.addEventListener("change", async () => {
-            const itemId = checkbox.dataset.itemId;
-            const isCompleted = checkbox.checked;
+    // Save task status.
+    document.addEventListener("change", async event => {
+        const select = event.target;
 
-            const matchingCheckboxes = document.querySelectorAll(
-                `.checklist-checkbox[data-item-id="${itemId}"]`
-            );
+        if (!select.matches(".task-status-select")) return;
 
-            matchingCheckboxes.forEach(item => item.disabled = true);
+        const savedStatus = select.dataset.savedStatus ?? select.value;
+        const form = select.closest("form");
+        if (!form) return;
 
-            try {
-                const token = document.querySelector(
-                    'input[name="__RequestVerificationToken"]'
-                )?.value;
+        const formData = new FormData(form);
+        select.disabled = true;
 
-                if (!token) throw new Error("Missing verification token.");
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            });
 
-                const data = new FormData();
-                data.append("itemId", itemId);
-                data.append("isCompleted", isCompleted);
-                data.append("__RequestVerificationToken", token);
+            if (!response.ok) {
+                throw new Error("Failed to save status.");
+            }
 
-                const response = await fetch(
-                    `${window.location.pathname}?handler=UpdateChecklistItem`,
-                    { method: "POST", body: data }
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error("Failed to save status.");
+            }
+
+            select.dataset.savedStatus = select.value;
+
+            const pageResponse = await fetch(window.location.href);
+
+            if (!pageResponse.ok) {
+                throw new Error("Failed to refresh tasks.");
+            }
+
+            const html = await pageResponse.text();
+            const updatedDocument = new DOMParser().parseFromString(html, "text/html");
+
+            const currentContent = document.getElementById("task-status-content");
+            const updatedContent = updatedDocument.getElementById("task-status-content");
+
+            if (!currentContent || !updatedContent) {
+                throw new Error("Task content not found.");
+            }
+
+            const sections = [
+                ".todays-focus-section",
+                ".in-progress-section",
+                ".coming-up-section",
+                ".completed-section",
+                ".dashboard-completed"
+            ];
+
+            sections.forEach(selector => {
+                const currentSection = currentContent.querySelector(selector);
+                const updatedSection = updatedContent.querySelector(selector);
+
+                if (currentSection && updatedSection) {
+                    currentSection.innerHTML = updatedSection.innerHTML;
+                }
+            });
+
+            // Synchronize task dialogs after updating the task sections.
+            const dialogPrefixes = [
+                "taskDialog-",
+                "editTaskDialog-",
+                "deleteTaskDialog-"
+            ];
+
+            dialogPrefixes.forEach(prefix => {
+                const updatedDialogs = updatedDocument.querySelectorAll(
+                    `dialog[id^="${prefix}"]`
                 );
 
-                if (!response.ok) throw new Error("Failed to save checklist.");
+                const updatedIds = new Set(
+                    [...updatedDialogs].map(dialog => dialog.id)
+                );
 
-                matchingCheckboxes.forEach(item => {
-                    item.checked = isCompleted;
+                document.querySelectorAll(`dialog[id^="${prefix}"]`).forEach(dialog => {
+                    if (!updatedIds.has(dialog.id) && !dialog.open) {
+                        dialog.remove();
+                    }
+                });
 
-                    const list = item.closest("ul");
-                    if (!list) return;
+                updatedDialogs.forEach(updatedDialog => {
+                    const existingDialog = document.getElementById(updatedDialog.id);
 
-                    const sortedItems = [...list.children].sort((a, b) => {
-                        const aCompleted = a.querySelector(".checklist-checkbox")?.checked ?? false;
-                        const bCompleted = b.querySelector(".checklist-checkbox")?.checked ?? false;
+                    if (existingDialog?.open) return;
 
-                        if (aCompleted !== bCompleted) {
-                            return Number(aCompleted) - Number(bCompleted);
-                        }
+                    const newDialog = updatedDialog.cloneNode(true);
 
-                        return Number(a.dataset.order) - Number(b.dataset.order);
+                    newDialog.querySelectorAll(
+                        ".task-status-select, .edit-task-form, form"
+                    ).forEach(element => {
+                        const form = element.matches("form")
+                            ? element
+                            : element.closest("form");
+
+                        if (!form) return;
+
+                        const url = new URL(form.action, window.location.href);
+                        url.pathname = window.location.pathname;
+                        url.searchParams.delete("id");
+                        form.action = url.toString();
                     });
 
-                    sortedItems.forEach(row => list.appendChild(row));
+                    if (existingDialog) {
+                        existingDialog.replaceWith(newDialog);
+                    } else {
+                        document.body.appendChild(newDialog);
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error(error);
+            select.value = savedStatus;
+            alert("Failed to save task status.");
+        } finally {
+            select.disabled = false;
+        }
+    });
+
+
+    // Save checklist changes and synchronize progress.
+    document.addEventListener("change", async event => {
+        const checkbox = event.target;
+
+        if (!checkbox.matches(".checklist-checkbox")) return;
+        const itemId = checkbox.dataset.itemId;
+        const isCompleted = checkbox.checked;
+
+        const matchingCheckboxes = document.querySelectorAll(
+            `.checklist-checkbox[data-item-id="${itemId}"]`
+        );
+
+        matchingCheckboxes.forEach(item => item.disabled = true);
+
+        try {
+            const token = document.querySelector(
+                'input[name="__RequestVerificationToken"]'
+            )?.value;
+
+            if (!token) throw new Error("Missing verification token.");
+
+            const data = new FormData();
+            data.append("itemId", itemId);
+            data.append("isCompleted", isCompleted);
+            data.append("__RequestVerificationToken", token);
+
+            const response = await fetch(
+                `${window.location.pathname}?handler=UpdateChecklistItem`,
+                { method: "POST", body: data }
+            );
+
+            if (!response.ok) throw new Error("Failed to save checklist.");
+
+            matchingCheckboxes.forEach(item => {
+                item.checked = isCompleted;
+
+                const list = item.closest("ul");
+                if (!list) return;
+
+                const sortedItems = [...list.children].sort((a, b) => {
+                    const aCompleted = a.querySelector(".checklist-checkbox")?.checked ?? false;
+                    const bCompleted = b.querySelector(".checklist-checkbox")?.checked ?? false;
+
+                    if (aCompleted !== bCompleted) {
+                        return Number(aCompleted) - Number(bCompleted);
+                    }
+
+                    return Number(a.dataset.order) - Number(b.dataset.order);
                 });
 
-                document.querySelectorAll(
-                    ".task-card-checklist, dialog[id^='taskDialog-']"
-                ).forEach(container => {
-                    const boxes = [...container.querySelectorAll(".checklist-checkbox")];
-                    if (!boxes.length) return;
+                sortedItems.forEach(row => list.appendChild(row));
+            });
 
-                    const completed = boxes.filter(item => item.checked).length;
-                    const count = container.querySelector(".checklist-count");
-                    const progress = container.querySelector(".checklist-progress");
+            document.querySelectorAll(
+                ".task-card-checklist, dialog[id^='taskDialog-']"
+            ).forEach(container => {
+                const boxes = [...container.querySelectorAll(".checklist-checkbox")];
+                if (!boxes.length) return;
 
-                    if (count) count.textContent = `${completed}/${boxes.length} done`;
-                    if (progress) progress.value = completed;
-                });
-            } catch (error) {
-                console.error(error);
-                matchingCheckboxes.forEach(item => item.checked = !isCompleted);
-                alert("Failed to save checklist item.");
-            } finally {
-                matchingCheckboxes.forEach(item => item.disabled = false);
-            }
-        });
+                const completed = boxes.filter(item => item.checked).length;
+                const count = container.querySelector(".checklist-count");
+                const progress = container.querySelector(".checklist-progress");
+
+                if (count) count.textContent = `${completed}/${boxes.length} done`;
+                if (progress) progress.value = completed;
+            });
+        } catch (error) {
+            console.error(error);
+            matchingCheckboxes.forEach(item => item.checked = !isCompleted);
+            alert("Failed to save checklist item.");
+        } finally {
+            matchingCheckboxes.forEach(item => item.disabled = false);
+        }
+
     });
 
     // Reopen the task details dialog after a status update.

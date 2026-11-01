@@ -24,159 +24,258 @@ document.getElementById("closeDeleteCourseDialog").addEventListener("click", () 
 });
 
 // Open the selected task's details dialog.
-document.querySelectorAll(".task-details-button").forEach(button => {
-    button.addEventListener("click", () => {
-        const taskId = button.dataset.taskId;
-        const dialog = document.getElementById(`taskDialog-${taskId}`);
+document.addEventListener("click", event => {
+    const button = event.target.closest(".task-details-button");
+    if (!button) return;
 
-        dialog.showModal();
-    });
+    const taskId = button.dataset.taskId;
+    document.getElementById(`taskDialog-${taskId}`)?.showModal();
 });
 
-// Close the task details dialog.
-document.querySelectorAll(".close-task-dialog").forEach(button => {
-    button.addEventListener("click", () => {
-        button.closest("dialog").close();
-    });
+// Handle task dialog actions.
+document.addEventListener("click", event => {
+    const button = event.target.closest(
+        ".close-task-dialog, " +
+        ".open-edit-task-dialog, " +
+        ".close-edit-task-dialog, " +
+        ".open-delete-task-dialog, " +
+        ".cancel-delete-task"
+    );
+
+    if (!button) return;
+
+    if (button.matches(
+        ".close-task-dialog, .close-edit-task-dialog, .cancel-delete-task"
+    )) {
+        button.closest("dialog")?.close();
+        return;
+    }
+
+    const taskId = button.dataset.taskId;
+
+    if (button.matches(".open-edit-task-dialog")) {
+        document.getElementById(`taskDialog-${taskId}`)?.close();
+        document.getElementById(`editTaskDialog-${taskId}`)?.showModal();
+    }
+
+    if (button.matches(".open-delete-task-dialog")) {
+        document.getElementById(`taskDialog-${taskId}`)?.close();
+        document.getElementById(`deleteTaskDialog-${taskId}`)?.showModal();
+    }
 });
 
-// Automatically save the task status when changed, without reloading the page.
-document.querySelectorAll(".task-status-select").forEach(select => {
-    let savedStatus = select.value;
+// Remember the current status before it changes.
+document.addEventListener("focusin", event => {
+    const select = event.target;
 
-    select.addEventListener("change", async () => {
-        const form = select.closest("form");
-        const formData = new FormData(form);
-
-        select.disabled = true;
-
-        try {
-            const response = await fetch(form.action, {
-                method: "POST",
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to save status.");
-            }
-
-            savedStatus = select.value;
-
-            const taskId = form.querySelector('input[name="taskId"]').value;
-            sessionStorage.setItem("reopenTaskDialog", taskId);
-
-            window.location.reload();
-
-        } catch (error) {
-            console.error(error);
-            select.value = savedStatus;
-            alert("Failed to save task status.");
-        } finally {
-            select.disabled = false;
-        }
-    });
+    if (select.matches(".task-status-select")) {
+        select.dataset.savedStatus = select.value;
+    }
 });
 
-// Save checklist changes and synchronize progress across the page.
-document.querySelectorAll(".checklist-checkbox").forEach(checkbox => {
-    checkbox.addEventListener("change", async () => {
-        const itemId = checkbox.dataset.itemId;
-        const isCompleted = checkbox.checked;
+// Save task status.
+document.addEventListener("change", async event => {
+    const select = event.target;
 
-        const matchingCheckboxes = document.querySelectorAll(
-            `.checklist-checkbox[data-item-id="${itemId}"]`
-        );
+    if (!select.matches(".task-status-select")) return;
 
-        matchingCheckboxes.forEach(item => {
-            item.disabled = true;
+    const savedStatus = select.dataset.savedStatus ?? select.value;
+    const form = select.closest("form");
+    const formData = new FormData(form);
+
+    select.disabled = true;
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
         });
 
-        try {
-            const token = document.querySelector(
-                'input[name="__RequestVerificationToken"]'
-            ).value;
+        if (!response.ok) {
+            throw new Error("Failed to save status.");
+        }
 
-            const data = new FormData();
-            data.append("itemId", itemId);
-            data.append("isCompleted", isCompleted);
-            data.append("__RequestVerificationToken", token);
+        const result = await response.json();
 
-            const response = await fetch(
-                `${window.location.pathname}?handler=UpdateChecklistItem`,
-                {
-                    method: "POST",
-                    body: data
-                }
+        if (!result.success) {
+            throw new Error("Failed to save status.");
+        }
+
+        select.dataset.savedStatus = select.value;
+
+        // Fetch the updated course page.
+        const pageResponse = await fetch(window.location.href);
+
+        if (!pageResponse.ok) {
+            throw new Error("Failed to refresh tasks.");
+        }
+
+        const html = await pageResponse.text();
+        const updatedDocument = new DOMParser().parseFromString(html, "text/html");
+
+        const currentContent = document.getElementById("task-status-content");
+        const updatedContent = updatedDocument.getElementById("task-status-content");
+
+        if (!currentContent || !updatedContent) {
+            throw new Error("Task content not found.");
+        }
+
+        // Update only the task sections.
+        const currentPage = currentContent.querySelector(
+            ".dashboard-book-page:first-child"
+        );
+
+        const updatedPage = updatedContent.querySelector(
+            ".dashboard-book-page:first-child"
+        );
+
+        if (!currentPage || !updatedPage) {
+            throw new Error("Course task section not found.");
+        }
+
+        currentPage.innerHTML = updatedPage.innerHTML;
+
+        // Synchronize task dialogs after updating the course tasks.
+        const dialogPrefixes = [
+            "taskDialog-",
+            "editTaskDialog-",
+            "deleteTaskDialog-"
+        ];
+
+        dialogPrefixes.forEach(prefix => {
+            const updatedDialogs = updatedDocument.querySelectorAll(
+                `dialog[id^="${prefix}"]`
             );
 
-            if (!response.ok) {
-                throw new Error("Failed to update checklist item.");
-            }
+            const updatedIds = new Set(
+                [...updatedDialogs].map(dialog => dialog.id)
+            );
 
-            // Synchronize matching checkboxes.
-            matchingCheckboxes.forEach(item => {
-                item.checked = isCompleted;
+            document.querySelectorAll(`dialog[id^="${prefix}"]`).forEach(dialog => {
+                if (!updatedIds.has(dialog.id) && !dialog.open) {
+                    dialog.remove();
+                }
             });
 
-            // Keep incomplete items in their original order and completed items last.
-            matchingCheckboxes.forEach(item => {
-                const list = item.closest("ul");
+            updatedDialogs.forEach(updatedDialog => {
+                const existingDialog = document.getElementById(updatedDialog.id);
 
-                const sortedItems = [...list.children].sort((a, b) => {
-                    const aCompleted = a.querySelector(".checklist-checkbox").checked;
-                    const bCompleted = b.querySelector(".checklist-checkbox").checked;
+                if (existingDialog?.open) return;
 
-                    if (aCompleted !== bCompleted) {
-                        return Number(aCompleted) - Number(bCompleted);
-                    }
+                const newDialog = updatedDialog.cloneNode(true);
 
-                    return Number(a.dataset.order) - Number(b.dataset.order);
-                });
-
-                sortedItems.forEach(row => list.appendChild(row));
+                if (existingDialog) {
+                    existingDialog.replaceWith(newDialog);
+                } else {
+                    document.body.appendChild(newDialog);
+                }
             });
+        });
 
-            // Update progress in both task cards and dialogs.
-            document.querySelectorAll(".task-card-checklist, dialog[id^='taskDialog-']")
-                .forEach(container => {
-                    const checkboxes = container.querySelectorAll(".checklist-checkbox");
-
-                    if (checkboxes.length === 0) return;
-
-                    const completed = [...checkboxes].filter(item => item.checked).length;
-                    const total = checkboxes.length;
-
-                    const count = container.querySelector(".checklist-count");
-                    const progress = container.querySelector(".checklist-progress");
-
-                    if (count) count.textContent = `${completed}/${total} done`;
-                    if (progress) progress.value = completed;
-                });
-
-        } catch (error) {
-            console.error(error);
-
-            matchingCheckboxes.forEach(item => {
-                item.checked = !isCompleted;
-            });
-
-            alert("Failed to save checklist item.");
-        } finally {
-            matchingCheckboxes.forEach(item => {
-                item.disabled = false;
-            });
-        }
-    });
+    } catch (error) {
+        console.error(error);
+        select.value = savedStatus;
+        alert("Failed to save task status.");
+    } finally {
+        select.disabled = false;
+    }
 });
 
-// Open the task editor from the details dialog.
-document.querySelectorAll(".open-edit-task-dialog").forEach(button => {
-    button.addEventListener("click", () => {
-        const taskId = button.dataset.taskId;
 
-        document.getElementById(`taskDialog-${taskId}`).close();
-        document.getElementById(`editTaskDialog-${taskId}`).showModal();
+// Save checklist changes and synchronize progress across the page.
+document.addEventListener("change", async event => {
+    const checkbox = event.target;
+
+    if (!checkbox.matches(".checklist-checkbox")) return;
+    const itemId = checkbox.dataset.itemId;
+    const isCompleted = checkbox.checked;
+
+    const matchingCheckboxes = document.querySelectorAll(
+        `.checklist-checkbox[data-item-id="${itemId}"]`
+    );
+
+    matchingCheckboxes.forEach(item => {
+        item.disabled = true;
     });
+
+    try {
+        const token = document.querySelector(
+            'input[name="__RequestVerificationToken"]'
+        ).value;
+
+        const data = new FormData();
+        data.append("itemId", itemId);
+        data.append("isCompleted", isCompleted);
+        data.append("__RequestVerificationToken", token);
+
+        const response = await fetch(
+            `${window.location.pathname}?handler=UpdateChecklistItem`,
+            {
+                method: "POST",
+                body: data
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to update checklist item.");
+        }
+
+        // Synchronize matching checkboxes.
+        matchingCheckboxes.forEach(item => {
+            item.checked = isCompleted;
+        });
+
+        // Keep incomplete items in their original order and completed items last.
+        matchingCheckboxes.forEach(item => {
+            const list = item.closest("ul");
+
+            const sortedItems = [...list.children].sort((a, b) => {
+                const aCompleted = a.querySelector(".checklist-checkbox").checked;
+                const bCompleted = b.querySelector(".checklist-checkbox").checked;
+
+                if (aCompleted !== bCompleted) {
+                    return Number(aCompleted) - Number(bCompleted);
+                }
+
+                return Number(a.dataset.order) - Number(b.dataset.order);
+            });
+
+            sortedItems.forEach(row => list.appendChild(row));
+        });
+
+        // Update progress in both task cards and dialogs.
+        document.querySelectorAll(".task-card-checklist, dialog[id^='taskDialog-']")
+            .forEach(container => {
+                const checkboxes = container.querySelectorAll(".checklist-checkbox");
+
+                if (checkboxes.length === 0) return;
+
+                const completed = [...checkboxes].filter(item => item.checked).length;
+                const total = checkboxes.length;
+
+                const count = container.querySelector(".checklist-count");
+                const progress = container.querySelector(".checklist-progress");
+
+                if (count) count.textContent = `${completed}/${total} done`;
+                if (progress) progress.value = completed;
+            });
+
+    } catch (error) {
+        console.error(error);
+
+        matchingCheckboxes.forEach(item => {
+            item.checked = !isCompleted;
+        });
+
+        alert("Failed to save checklist item.");
+    } finally {
+        matchingCheckboxes.forEach(item => {
+            item.disabled = false;
+        });
+    }
 });
 
 // Add new checklist items without submitting the form.
@@ -225,13 +324,6 @@ document.querySelectorAll(".edit-task-form").forEach(form => {
     });
 });
 
-// Close the task editor.
-document.querySelectorAll(".close-edit-task-dialog").forEach(button => {
-    button.addEventListener("click", () => {
-        button.closest("dialog").close();
-    });
-});
-
 // Open the course dialog if server-side validation failed.
 if (document.querySelector("main").dataset.courseNameError === "True") {
     editCourseDialog.showModal();
@@ -243,18 +335,6 @@ if (document.querySelector("main").dataset.taskInputError === "True") {
         block: "start"
     });
 }
-
-// Custom confirmation dialog, matching the course deletion dialog.
-document.querySelectorAll(".open-delete-task-dialog").forEach(button => {
-    button.addEventListener("click", () => {
-        const taskId = button.dataset.taskId;
-        document.getElementById(`taskDialog-${taskId}`)?.close();
-        document.getElementById(`deleteTaskDialog-${taskId}`)?.showModal();
-    });
-});
-document.querySelectorAll(".cancel-delete-task").forEach(button => {
-    button.addEventListener("click", () => button.closest("dialog")?.close());
-});
 
 // Validate the course editor without browser popups.
 const courseForm = editCourseDialog.querySelector('form');
@@ -271,13 +351,3 @@ courseForm.addEventListener("submit", event => {
 courseForm.addEventListener("input", () => {
     courseForm.querySelectorAll('[data-valmsg-for]').forEach(x => x.textContent = "");
 });
-
-// Reopen the task details dialog after a status update.
-const reopenTaskId = sessionStorage.getItem("reopenTaskDialog");
-
-if (reopenTaskId) {
-    sessionStorage.removeItem("reopenTaskDialog");
-
-    const taskDialog = document.getElementById(`taskDialog-${reopenTaskId}`);
-    taskDialog?.showModal();
-}

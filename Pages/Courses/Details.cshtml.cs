@@ -216,7 +216,12 @@ public class DetailsModel : PageModel
         if (!updated)
             return NotFound();
 
-        return RedirectToPage("./Details", new { id });
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            return new JsonResult(new { success = true, status });
+        }
+
+        return RedirectToPage("./Index");
     }
 
     // Update a checklist item's completion status.
