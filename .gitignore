@@ -487,3 +487,6 @@ $RECYCLE.BIN/
 *.db-wal
 *.sqlite
 *.sqlite3
+
+# Drawio-file
+ER.drawio

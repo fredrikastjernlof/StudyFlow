@@ -67,19 +67,25 @@ StudyFlow körs lokalt och kräver .NET 10 SDK samt Entity Framework Core CLI-ve
    dotnet restore
    ```
 
-3. Skapa databasen med projektets migreringar:
+3. Bygg projektet:
+
+   ```bash
+   dotnet build
+   ```
+
+4. Skapa databasen med projektets migreringar:
 
    ```bash
    dotnet ef database update
    ```
 
-4. Starta applikationen:
+5. Starta applikationen:
 
    ```bash
    dotnet run
    ```
 
-5. Öppna adressen som visas i terminalen.
+6. Öppna adressen som visas i terminalen.
 
 ### Skapa ett konto
 
